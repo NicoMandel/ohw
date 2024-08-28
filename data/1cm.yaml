@@ -1,0 +1,7 @@
+path: /home/mandel/src/csu/ohw/datasets/1cm
+train: autosplit_train.txt
+val: autosplit_val.txt 
+test: test
+
+nc: 1
+names: ['ohw']
