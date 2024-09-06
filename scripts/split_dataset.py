@@ -9,7 +9,7 @@ if __name__=="__main__":
     fdir = os.path.dirname(__file__)
     basedir = os.path.abspath(os.path.join(fdir, '..'))
 
-    ds_name = "1cm"
+    ds_name = "0.24cm"
     dataset_path = os.path.join(basedir, "datasets", ds_name, "train")
 
     autosplit(
