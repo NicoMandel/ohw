@@ -33,7 +33,7 @@ class DisplayLabelsDataset(VisionDataset):
 
         img = load_image(imgf)
         labelarr = load_label(lf)
-        return img, labelarr
+        return img, labelarr, img_id
 
     # from yolov8 basedataset
     def get_img_files(self, img_path):

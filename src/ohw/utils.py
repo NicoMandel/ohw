@@ -9,6 +9,12 @@ def load_image(imgf: str):
     rgb_img = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
     return rgb_img
 
+def save_image(img : np.ndarray, path):
+    """
+        Function to save the iamge.
+    """
+    cv2.imwrite(path, cv2.cvtColor(img, cv2.COLOR_RGB2BGR))  
+
 def load_label(label_f : str):
     return np.genfromtxt(label_f, delimiter=' ')
 
@@ -21,6 +27,8 @@ def det_to_bb(shape : tuple, detections : np.ndarray) -> list:
         or even better, this one: https://docs.ultralytics.com/usage/simple-utilities/#bounding-boxes
         look through all of this for simplicity!
     """
+    if len(detections.shape) == 1:
+        detections = detections[np.newaxis,:]
     img_w, img_h = shape[:2]
     det_xyxy = xywhn2xyxy(detections[:,1:], img_w, img_h)
     det = np.c_[detections[:,0], det_xyxy]
