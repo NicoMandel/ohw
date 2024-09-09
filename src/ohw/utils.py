@@ -1,3 +1,5 @@
+import os.path
+from pathlib import Path
 import numpy as np
 # import rawpy
 from PIL import Image
@@ -17,6 +19,23 @@ def save_image(img : np.ndarray, path):
 
 def load_label(label_f : str):
     return np.genfromtxt(label_f, delimiter=' ')
+
+def get_site_dirs(path : str) -> bool:
+    """
+        Function to return site dirs by looking for <images> and <labels> subdir.
+    """
+    if not os.path.isdir(path): return False
+    root = Path(path)
+    img_set = set([pt.parent.absolute() for pt in root.rglob('**/images/')])
+    lab_set = set([pt.parent.absolute() for pt in root.rglob('**/labels/')])
+    inters = img_set.intersection(lab_set)
+    return inters
+
+def _has_img_subdir(path : str) -> bool:
+    pass
+
+def _has_label_subdir(path : str) -> bool:
+    pass
 
 def det_to_bb(shape : tuple, detections : np.ndarray) -> list:
     """

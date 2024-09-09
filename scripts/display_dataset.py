@@ -1,10 +1,9 @@
 import os.path
 from pathlib import Path
 from argparse import ArgumentParser
-# from ultralytics.data import YOLODataset
 from ultralytics.utils.plotting import Annotator, colors
 from ohw.dataset import DisplayLabelsDataset
-from ohw.utils import det_to_bb, save_image
+from ohw.utils import det_to_bb, save_image, get_site_dirs
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 
@@ -12,26 +11,21 @@ def parse_args():
     parser = ArgumentParser(description="Script for displaying the images for a site with associated labels.")
     parser.add_argument("-i", "--input", required=False, type=str, help="Location of the input folder, as root. Will find <images> and <labels> subfolders.")
     parser.add_argument("-o", "--output", action="store_true", help="Boolean value. If given, will create output folder structure with <visualisations> subfolder in subdirectory.")
-    args = parser.parse_args()
-    return vars(args)
-
-if __name__=="__main__":
-    args = parse_args()
-    fdir = os.path.abspath(os.path.dirname(__file__))
-    idir = "images"
-    ldir = "labels"
-
-    site_dir = os.path.abspath(os.path.expanduser("~/src/csu/data/OHW/0.24_sites/CH-NE"))
+    parser.add_argument("-r", "--recursive", action="store_true", help="Boolean value. If given, will look recursively for subfolders <images> and <labels> and add them to the set.")
+    return parser.parse_args()
+    
+def visualise_images(input_dir : str, output : bool):
+    site_dir = os.path.abspath(input_dir)
     visdir = Path(os.path.abspath(os.path.join(site_dir, "visualisations")))
     yds = DisplayLabelsDataset(site_dir)
 
     # if --output is given
-    if args.output:
+    if output:
         visdir.mkdir(exist_ok=True)
         print("Created: {}\nWill write images to it, if they don't exist yet".format(visdir))
 
     
-    for img, detections, img_id in tqdm(yds):
+    for img, detections, img_id in tqdm(yds, leave=True):
         ann = Annotator(
             img,
             line_width=None,  # default auto-size
@@ -40,7 +34,7 @@ if __name__=="__main__":
             pil=False,  # use PIL, otherwise uses OpenCV
         )
         bboxes = det_to_bb(img.shape, detections)
-        for nb, box in enumerate(bboxes):
+        for box in bboxes:
             c_idx, *box = box
             label = "OHW"
             ann.box_label(box, label, colors(c_idx, bgr=True))
@@ -51,3 +45,12 @@ if __name__=="__main__":
         else:  
             plt.imshow(img_w_bboxes)
             plt.show()
+
+if __name__=="__main__":
+    args = parse_args()
+    if args.recursive:
+        site_dirs = get_site_dirs(args.input)
+        for site in site_dirs:
+            visualise_images(str(site), args.output)
+    else:
+        visualise_images(args.input, args.output)
