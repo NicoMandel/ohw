@@ -10,4 +10,6 @@ dependencies:
   - ca-certificates
   - certifi
   - openssl
+  - pipreqs
+  - tensorboard
 prefix: /home/mandel/mambaforge/envs/ohw
