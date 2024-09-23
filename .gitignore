@@ -1,4 +1,4 @@
- # empty file for committing
+# empty file for committing
 
 *.egg-info
 
@@ -9,6 +9,9 @@
 **/outputs/
 
 **/.tmp/
+
+# Singularity images files
+**/*.simg
 
 # Yolo model files
 yolov*.pt
