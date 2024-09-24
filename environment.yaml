@@ -11,5 +11,7 @@ dependencies:
   - certifi
   - openssl
   - pipreqs
+  - google-auth
   - tensorboard
+  - openpyxl
 prefix: /home/mandel/mambaforge/envs/ohw

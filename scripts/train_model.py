@@ -1,8 +1,17 @@
 import os.path
 from datetime import datetime
+from argparse import ArgumentParser
 from ultralytics import YOLO, settings
 from test_model import test_model
 from ohw.utils import append_to_xlsx
+
+def parse_args():
+    parser = ArgumentParser(description="Script for training a model on a specified dataset.")
+    parser.add_argument("size", type=str, help="Size of the model. Choose from n,s,m,l,x etc. Or a file")
+    parser.add_argument("dataset", help="name of the .yaml file in the <data> folder.")
+    parser.add_argument("-t", "--test", type=str, default=None, help="Test dataset, if different from train dataset file")
+    parser.add_argument("-s", "--save", type=str, default=None, help="File where to store results")
+    return parser.parse_args()
 
 # https://docs.ultralytics.com/modes/train/#usage-examples
 def train_model(model : YOLO, data_path, project : str, name : str):
@@ -10,7 +19,7 @@ def train_model(model : YOLO, data_path, project : str, name : str):
         # model = os.path.join(basedir, "yolov8s.pt"),
         # model = "yolov8s.pt",
         data = data_path,
-        epochs=2,
+        epochs=300,
         imgsz=1280,
         batch=2,
         cache=False,
@@ -21,18 +30,19 @@ def train_model(model : YOLO, data_path, project : str, name : str):
     return results, model
 
 if __name__=="__main__":
+    args = parse_args()
     # Dataset
     settings.update({"datasets_dir" : "datasets"})
     fdir = os.path.dirname(__file__)
     basedir = os.path.abspath(os.path.join(fdir, '..'))
     
-    train_dataset = "1cm"
-    test_dataset = train_dataset
+    train_dataset = args.dataset
+    test_dataset = args.test if args.test else train_dataset
     train_data_path = os.path.join(basedir, "data", "{}.yaml".format(train_dataset))       # https://github.com/ultralytics/ultralytics/issues/8823
-    test_data_path = train_data_path
+    test_data_path = os.path.join(basedir, "data", "{}.yaml".format(test_dataset))
 
     # Model
-    model_size = "s"
+    model_size = args.size
     model = YOLO("yolov8{}.pt".format(model_size))
     
     # Training time:
@@ -48,7 +58,7 @@ if __name__=="__main__":
     results, model = train_model(model, train_data_path, project="results", name=model_name)
     metrics, model = test_model(model, test_data_path, project="results", name=model_name)
     
-
-    out_dict = {**param_dict, **metrics.results_dict}
-    xlsxf = os.path.join(basedir, "results", "yolov8.xlsx")
-    append_to_xlsx(model_name, out_dict, xlsxf)
+    if args.save:
+        out_dict = {**param_dict, **metrics.results_dict}
+        xlsxf = os.path.join(basedir, args.save)
+        append_to_xlsx(model_name, out_dict, xlsxf)
