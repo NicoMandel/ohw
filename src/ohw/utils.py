@@ -1,8 +1,9 @@
 import os.path
 from pathlib import Path
 import numpy as np
+import pandas as pd
 # import rawpy
-from PIL import Image
+# from PIL import Image
 import cv2
 from ultralytics.utils.ops import xywhn2xyxy
 
@@ -53,8 +54,23 @@ def det_to_bb(shape : tuple, detections : np.ndarray) -> list:
     det = np.c_[detections[:,0], det_xyxy]
     return det
 
-
-
+def append_to_xlsx(key, results_dict : dict, xlsx_f : str) -> bool:
+    df = pd.DataFrame(
+        data=results_dict,
+        index=[key]
+    )
+    try:
+        if os.path.exists(xlsx_f):
+            df_prev = pd.read_excel(open(xlsx_f, 'rb'), header=0)
+            result = pd.concat([df_prev, df])
+        else:
+            result = df
+        with pd.ExcelWriter(xlsx_f) as writer:
+            result.to_excel(writer, index=0)
+        return True
+    except OSError as ose:
+        print(ose)
+        return False
 # def load_arw(fpath : str) -> np.ndarray:
 #     """
 #         Loading an ARW image. Thanks to Rob
