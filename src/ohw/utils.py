@@ -84,3 +84,18 @@ def append_to_xlsx(key, results_dict : dict, xlsx_f : str) -> bool:
 #     """
 #     np_arr = load_arw(fpath)
 #     return Image.fromarray(np_arr)
+    
+def get_name_from_path(path : str) -> str:
+    """
+        Function to get the <name> of a model from a path. Because the name is always in front of weights/best.pt
+    """
+    return os.path.normpath(path).split(os.sep)[-3]
+
+def replace_test_dataset(filename : str, test_dataset : str, separator : str = "-") -> str:
+    """
+        Function to replace the test_dataset component of a model_name with another
+    """
+    model_name  = get_name_from_path(filename)
+    mn =  model_name.rsplit(sep=separator)
+    mn[-1] = test_dataset
+    return separator.join(mn)

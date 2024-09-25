@@ -62,3 +62,6 @@ if __name__=="__main__":
         out_dict = {**param_dict, **metrics.results_dict}
         xlsxf = os.path.join(basedir, args.save)
         append_to_xlsx(model_name, out_dict, xlsxf)
+    else:
+        print("Model Results for model: {}".format(model_name))
+        print(metrics.results_dict)
