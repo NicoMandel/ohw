@@ -13,6 +13,9 @@
 # Singularity images files
 **/*.simg
 
+# Zipped files
+**/*.zip
+
 # Yolo model files
 yolov*.pt
 
