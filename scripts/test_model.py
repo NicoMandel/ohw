@@ -1,8 +1,7 @@
 import os.path
 from argparse import ArgumentParser
-from datetime import datetime
 from ultralytics import YOLO, settings
-from ohw.utils import append_to_xlsx, replace_test_dataset
+from ohw.utils import append_to_xlsx, get_model_params
 
 def parse_args():
     parser = ArgumentParser(description="Script for testing a model on a specified dataset.")
@@ -35,15 +34,8 @@ if __name__=="__main__":
 
     # Model settings
     model = YOLO(args.model)
+    param_dict, model_name = get_model_params(args)
 
-    # Test time
-    today = datetime.today().strftime("%Y%m%d")
-    param_dict = {
-        "date": today,
-        "train_dataset": "NA",
-        "test_dataset": test_dataset
-    }
-    model_name = args.name if args.name else replace_test_dataset(args.model, test_dataset)
     # training settings: https://docs.ultralytics.com/modes/train/#train-settings
     metrics, model = test_model(model, data_path, project="results", name=model_name)
     

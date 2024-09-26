@@ -1,4 +1,5 @@
 import os.path
+from datetime import datetime
 from pathlib import Path
 import numpy as np
 import pandas as pd
@@ -71,6 +72,7 @@ def append_to_xlsx(key, results_dict : dict, xlsx_f : str) -> bool:
     except OSError as ose:
         print(ose)
         return False
+    
 # def load_arw(fpath : str) -> np.ndarray:
 #     """
 #         Loading an ARW image. Thanks to Rob
@@ -91,11 +93,26 @@ def get_name_from_path(path : str) -> str:
     """
     return os.path.normpath(path).split(os.sep)[-3]
 
-def replace_test_dataset(filename : str, test_dataset : str, separator : str = "-") -> str:
+
+def param_dict_from_name(filename : str, separator : str = "-") -> dict:
     """
-        Function to replace the test_dataset component of a model_name with another
+        Function to get a parameter dictionary from a name
     """
     model_name  = get_name_from_path(filename)
-    mn =  model_name.rsplit(sep=separator)
-    mn[-1] = test_dataset
-    return separator.join(mn)
+    mn = model_name.split(separator)
+    return {
+        "date": mn[0],
+        "model_size" : mn[1],
+        "train_dataset" : mn[2],
+        "test_dataset" : mn[3]
+    }
+
+def get_model_params(args) -> tuple[dict, str]:
+    """
+        Function to get model name and parameter
+    """
+    # Test time
+    param_dict = param_dict_from_name(args.model)
+    param_dict["test_dataset"] = args.dataset
+    model_name = "-".join(list(param_dict.values()))
+    return param_dict, model_name
