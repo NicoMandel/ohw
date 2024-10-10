@@ -1,3 +1,4 @@
+from typing import Tuple
 import os.path
 from datetime import datetime
 from pathlib import Path
@@ -107,7 +108,7 @@ def param_dict_from_name(filename : str, separator : str = "-") -> dict:
         "test_dataset" : mn[3]
     }
 
-def get_model_params(args) -> tuple[dict, str]:
+def get_model_params(args) -> Tuple[dict, str]:
     """
         Function to get model name and parameter
     """

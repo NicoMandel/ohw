@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 def parse_args():
     parser = ArgumentParser(description="Script for displaying the images for a site with associated labels.")
-    parser.add_argument("-i", "--input", required=False, type=str, help="Location of the input folder, as root. Will find <images> and <labels> subfolders.")
+    parser.add_argument("input", type=str, help="Location of the input folder, as root. Will find <images> and <labels> subfolders.")
     parser.add_argument("-o", "--output", action="store_true", help="Boolean value. If given, will create output folder structure with <visualisations> subfolder in subdirectory.")
     parser.add_argument("-r", "--recursive", action="store_true", help="Boolean value. If given, will look recursively for subfolders <images> and <labels> and add them to the set.")
     return parser.parse_args()
@@ -23,8 +23,7 @@ def visualise_images(input_dir : str, output : bool):
     if output:
         visdir.mkdir(exist_ok=True)
         print("Created: {}\nWill write images to it, if they don't exist yet".format(visdir))
-
-    
+        
     for img, detections, img_id in tqdm(yds, leave=True):
         ann = Annotator(
             img,
@@ -51,6 +50,6 @@ if __name__=="__main__":
     if args.recursive:
         site_dirs = get_site_dirs(args.input)
         for site in site_dirs:
-            visualise_images(str(site), args.output)
+            visualise_images(str(site), args.output, args.model)
     else:
-        visualise_images(args.input, args.output)
+        visualise_images(args.input, args.output, args.model)

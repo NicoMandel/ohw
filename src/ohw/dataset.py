@@ -1,3 +1,4 @@
+from typing import Tuple
 import os.path
 from pathlib import Path
 import glob
@@ -9,31 +10,13 @@ from torchvision.datasets.vision import VisionDataset
 from ultralytics.data.utils import IMG_FORMATS, FORMATS_HELP_MSG, img2label_paths
 from ohw.utils import load_image, load_label
 
-class DisplayLabelsDataset(VisionDataset):
-    def __init__(self, root : str, img_dir = "images", ldir = "labels") -> None:
-        super().__init__(root=root)
-
-        # default
+class DisplayDataset(VisionDataset):
+    def __init__(self, root, img_dir = "images") -> None:
+        super().__init__(root = root)
         self.root = os.path.abspath(root)
         self.imgdir = Path(self.root) / img_dir
-        self.labeldir = Path(self.root) / ldir
-        
-        # 
+
         self.img_list = self.get_img_files(self.imgdir)
-        self.label_list = self.get_label_files()
-
-    def __len__(self) -> int:
-        return len(self.img_list)
-    
-    def __getitem__(self, index: int) -> tuple[Image.Any, ]:
-        imgf = self.img_list[index]
-        img_id = Path(imgf).stem
-        lid = img_id + ".txt"
-        lf = os.path.join(self.labeldir, lid)
-
-        img = load_image(imgf)
-        labelarr = load_label(lf)
-        return img, labelarr, img_id
 
     # from yolov8 basedataset
     def get_img_files(self, img_path):
@@ -58,6 +41,31 @@ class DisplayLabelsDataset(VisionDataset):
         except Exception as e:
             raise FileNotFoundError(f"{self.prefix}Error loading data from {img_path}\n") from e
         return im_files
+
+    def __len__(self) -> int:
+        return len(self.img_list)
+
+    def __getitem__(self, index: int) -> Image.Any:
+        imgf = self.img_list[index]
+        img_id = Path(imgf).stem
+        img = load_image(imgf)
+        return img, img_id
+
+class DisplayLabelsDataset(DisplayDataset):
+    def __init__(self, root : str, img_dir = "images", ldir = "labels") -> None:
+        super().__init__(root=root, img_dir=img_dir)
+
+        # default
+        self.labeldir = Path(self.root) / ldir 
+        self.label_list = self.get_label_files()
+    
+    def __getitem__(self, index: int) -> Tuple[Image.Any, str]:
+        img, img_id = super(self)[index]
+        lid = img_id + ".txt"
+        lf = os.path.join(self.labeldir, lid)
+
+        labelarr = load_label(lf)
+        return img, labelarr, img_id
     
     def get_label_files(self):
         self.label_files = img2label_paths(self.img_list)
