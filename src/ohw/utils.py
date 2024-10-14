@@ -9,10 +9,11 @@ import pandas as pd
 import cv2
 from ultralytics.utils.ops import xywhn2xyxy
 
-def load_image(imgf: str):
-    im = cv2.imread(imgf)
-    rgb_img = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
-    return rgb_img
+def load_image(imgf: str, convert : bool = False):
+    bgr_im = cv2.imread(imgf)
+    im = cv2.cvtColor(bgr_im, cv2.COLOR_BGR2RGB) if convert else bgr_im
+    # rgb_img = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
+    return im
 
 def save_image(img : np.ndarray, path):
     """
@@ -22,6 +23,9 @@ def save_image(img : np.ndarray, path):
 
 def load_label(label_f : str):
     return np.genfromtxt(label_f, delimiter=' ')
+
+def save_label(array : np.ndarray, label_f : str) -> None:
+    np.savetxt(label_f, array)
 
 def get_site_dirs(path : str) -> bool:
     """
