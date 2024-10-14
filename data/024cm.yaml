@@ -1,4 +1,4 @@
-path: /home/mandel/src/csu/ohw/datasets/0.24cm
+path: ../datasets/0.24cm
 train: autosplit_train.txt
 val: autosplit_val.txt 
 test: test
