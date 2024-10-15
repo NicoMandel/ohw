@@ -34,7 +34,7 @@ def save_label(array : np.ndarray, label_f : str) -> None:
     """
     with open(label_f, '+w') as f:
         for l in array:
-            f.write("{} {:.6f} {:.6f} {:.6f} {:.6f}".format(l[0].astype(int), l[1], l[2], l[3], l[4]))
+            f.write("{} {:.6f} {:.6f} {:.6f} {:.6f}\n".format(l[0].astype(int), l[1], l[2], l[3], l[4]))
 
 def get_site_dirs(path : str) -> bool:
     """
