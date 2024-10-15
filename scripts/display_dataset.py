@@ -25,6 +25,7 @@ def visualise_images(input_dir : str, output : bool):
         print("Created: {}\nWill write images to it, if they don't exist yet".format(visdir))
         
     for img, detections, img_id in tqdm(yds, leave=True):
+        # https://docs.ultralytics.com/usage/simple-utilities/#horizontal-bounding-boxes
         ann = Annotator(
             img,
             line_width=None,  # default auto-size
@@ -36,7 +37,7 @@ def visualise_images(input_dir : str, output : bool):
         for box in bboxes:
             c_idx, *box = box
             label = "OHW"
-            ann.box_label(box, label, colors(c_idx, bgr=True))
+            ann.box_label(box, label, colors(c_idx, bgr=False))
         img_w_bboxes = ann.result()
         if output:
             out_p = visdir / (img_id + ".jpg")
@@ -50,6 +51,6 @@ if __name__=="__main__":
     if args.recursive:
         site_dirs = get_site_dirs(args.input)
         for site in site_dirs:
-            visualise_images(str(site), args.output, args.model)
+            visualise_images(str(site), args.output)
     else:
-        visualise_images(args.input, args.output, args.model)
+        visualise_images(args.input, args.output)

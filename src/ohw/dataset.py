@@ -60,7 +60,7 @@ class DisplayLabelsDataset(DisplayDataset):
         self.label_list = self.get_label_files()
     
     def __getitem__(self, index: int) -> Tuple[Image.Any, str]:
-        img, img_id = super(self)[index]
+        img, img_id = super().__getitem__(index) #[index]
         lid = img_id + ".txt"
         lf = os.path.join(self.labeldir, lid)
 

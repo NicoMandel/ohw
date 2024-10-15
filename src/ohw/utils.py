@@ -15,17 +15,26 @@ def load_image(imgf: str, convert : bool = False):
     # rgb_img = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
     return im
 
-def save_image(img : np.ndarray, path):
+def save_image(img : np.ndarray, path, cvtcolor : bool = False):
     """
         Function to save the iamge.
     """
-    cv2.imwrite(path, cv2.cvtColor(img, cv2.COLOR_RGB2BGR))  
+    img = img if not cvtcolor else cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+    cv2.imwrite(path, img)  
 
 def load_label(label_f : str):
     return np.genfromtxt(label_f, delimiter=' ')
 
 def save_label(array : np.ndarray, label_f : str) -> None:
-    np.savetxt(label_f, array)
+    """
+        TODO: Change, see:
+        https://numpy.org/doc/2.0/reference/generated/numpy.savetxt.html
+        https://github.com/ultralytics/ultralytics/issues/2143
+
+    """
+    with open(label_f, '+w') as f:
+        for l in array:
+            f.write("{} {:.6f} {:.6f} {:.6f} {:.6f}".format(l[0].astype(int), l[1], l[2], l[3], l[4]))
 
 def get_site_dirs(path : str) -> bool:
     """
