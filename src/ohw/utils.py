@@ -4,15 +4,18 @@ from datetime import datetime
 from pathlib import Path
 import numpy as np
 import pandas as pd
-# import rawpy
+import rawpy
 # from PIL import Image
 import cv2
 from ultralytics.utils.ops import xywhn2xyxy
 
-def load_image(imgf: str, convert : bool = False):
-    bgr_im = cv2.imread(imgf)
-    im = cv2.cvtColor(bgr_im, cv2.COLOR_BGR2RGB) if convert else bgr_im
-    # rgb_img = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
+def load_image(imgf: str, convert : bool = False) -> np.ndarray:
+    if imgf.lower().endswith(".arw"):
+        im = load_arw(imgf)
+    else:
+        bgr_im = cv2.imread(imgf)
+        im = cv2.cvtColor(bgr_im, cv2.COLOR_BGR2RGB) if convert else bgr_im
+        # rgb_img = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
     return im
 
 def save_image(img : np.ndarray, path, cvtcolor : bool = False):
@@ -21,6 +24,10 @@ def save_image(img : np.ndarray, path, cvtcolor : bool = False):
     """
     img = img if not cvtcolor else cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
     cv2.imwrite(path, img)  
+
+def load_arw(fpath : str) -> np.ndarray:
+    raw = rawpy.imread(fpath)
+    return raw.postprocess(use_camera_wb=True, output_bps=8)
 
 def load_label(label_f : str):
     return np.genfromtxt(label_f, delimiter=' ')

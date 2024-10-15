@@ -10,11 +10,13 @@ from torchvision.datasets.vision import VisionDataset
 from ultralytics.data.utils import IMG_FORMATS, FORMATS_HELP_MSG, img2label_paths
 from ohw.utils import load_image, load_label
 
+IMG_FORMATS.add("arw")
+
 class DisplayDataset(VisionDataset):
-    def __init__(self, root, img_dir = "images") -> None:
+    def __init__(self, root, img_dir :str = "images") -> VisionDataset:
         super().__init__(root = root)
         self.root = os.path.abspath(root)
-        self.imgdir = Path(self.root) / img_dir
+        self.imgdir = Path(self.root) / img_dir if img_dir else Path(self.root)
 
         self.img_list = self.get_img_files(self.imgdir)
 
