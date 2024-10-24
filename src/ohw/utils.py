@@ -43,6 +43,15 @@ def save_label(array : np.ndarray, label_f : str) -> None:
         for l in array:
             f.write("{} {:.6f} {:.6f} {:.6f} {:.6f}\n".format(l[0].astype(int), l[1], l[2], l[3], l[4]))
 
+def write_summary(summarydict : dict, outf : str, orig_len : int):
+    """
+        to write summary statistics to a file
+    """
+    with open(outf, 'w') as f:
+        f.write("{} of {} files with predicted objects\n".format(len(summarydict), orig_len))
+        [f.write("{}: {} detections".format(k, v)) for k, v in summarydict.items()]
+
+
 def get_site_dirs(path : str) -> bool:
     """
         Function to return site dirs by looking for <images> and <labels> subdir.
