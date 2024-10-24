@@ -58,7 +58,7 @@ class DisplayLabelsDataset(DisplayDataset):
         super().__init__(root=root, img_dir=img_dir)
 
         # default
-        self.labeldir = Path(self.root) / ldir 
+        self.labeldir = Path(self.root) / ldir if ldir == "labels" else Path(ldir)
         self.label_list = self.get_label_files()
     
     def __getitem__(self, index: int) -> Tuple[Image.Any, str]:
@@ -66,8 +66,14 @@ class DisplayLabelsDataset(DisplayDataset):
         lid = img_id + ".txt"
         lf = os.path.join(self.labeldir, lid)
 
-        labelarr = load_label(lf)
+        labelarr = load_label(lf) if os.path.exists(lf) else None
         return img, labelarr, img_id
     
-    def get_label_files(self):
-        self.label_files = img2label_paths(self.img_list)
+    def get_label_files(self) -> list:
+        """
+            method to get label files by using images of super an then cleaning by file existence 
+        """
+        label_files = img2label_paths(self.img_list)
+        clf = [lf for lf in label_files if os.path.exists(os.path.join(self.labeldir, lf))]
+        assert len(clf) > 0, "No label files could be found. Double check!"
+        return clf

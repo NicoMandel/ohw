@@ -10,8 +10,10 @@ import matplotlib.pyplot as plt
 
 def parse_args():
     parser = ArgumentParser(description="Script for displaying the images for a site with associated labels.")
-    parser.add_argument("input", type=str, help="Location of the input folder, as root. Will find <images> and <labels> subfolders.")
-    parser.add_argument("-o", "--output", action="store_true", help="Boolean value. If given, will create output folder structure with <visualisations> subfolder in subdirectory.")
+    parser.add_argument("input", type=str, help="Location of the input folder, as root. If optional argument <labels> is not given, will find <images> and <labels> subfolders. Otherwise uses this as the input folder.")
+    parser.add_argument("-l", "--labels", default=None, type=str, help="Location of labels folder, if not subfolder of root. If not given, will look for <images> and <labels> subfolder in argument <input>.")
+    parser.add_argument("-o", "--output", default=None, type=str, help="Output folder location. If given, will create subfolder with <visualisations>")
+    parser.add_argument("-n", "--name", type=str, default=None, help="Name of the dataset to be used inside the <output>/dataset/<visualisations>. If none given, will use folder name of ds.")
     parser.add_argument("-r", "--recursive", action="store_true", help="Boolean value. If given, will look recursively for subfolders <images> and <labels> and add them to the set.")
     return parser.parse_args()
 
@@ -32,19 +34,27 @@ def annotate_image(img : np.ndarray, detections : np.ndarray) -> np.ndarray:
         img_w_bboxes = ann.result()
         return img_w_bboxes
 
-def visualise_images(input_dir : str, output : bool):
+def visualise_images(input_dir : str, label_dir : str = None, output_dir : str = None, output_name : str = None):
     site_dir = os.path.abspath(input_dir)
-    visdir = Path(os.path.abspath(os.path.join(site_dir, "visualisations")))
-    yds = DisplayLabelsDataset(site_dir)
+    outdir_name =  output_name if output_name else os.path.basename(os.path.normpath(site_dir))
+    yds = DisplayLabelsDataset(site_dir) if label_dir is None else DisplayLabelsDataset(root=site_dir, img_dir=None, ldir=label_dir)
 
     # if --output is given
-    if output:
-        visdir.mkdir(exist_ok=True)
+    if output_dir:
+        visdir = Path(os.path.abspath(os.path.join(output_dir, outdir_name, "visualisations")))
+        visdir.mkdir(exist_ok=True, parents=True)
         print("Created: {}\nWill write images to it, if they don't exist yet".format(visdir))
         
     for img, detections, img_id in tqdm(yds, leave=True):
-        img_w_bboxes = annotate_image(img, detections)
-        if output:
+        if np.any(detections):
+            img_w_bboxes = annotate_image(img, detections)
+
+        # if no label -> for false Positives
+        else: 
+            img_w_bboxes = img
+            # continue
+
+        if output_dir:
             out_p = visdir / (img_id + ".jpg")
             save_image(img_w_bboxes, str(out_p))
         else:  
@@ -56,6 +66,7 @@ if __name__=="__main__":
     if args.recursive:
         site_dirs = get_site_dirs(args.input)
         for site in site_dirs:
-            visualise_images(str(site), args.output)
+            site_n = os.path.basename(os.path.normpath(str(site)))
+            visualise_images(str(site), args.output, output_name=site_n)
     else:
-        visualise_images(args.input, args.output)
+        visualise_images(args.input, args.labels, args.output, args.name)
