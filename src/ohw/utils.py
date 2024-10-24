@@ -49,7 +49,7 @@ def write_summary(summarydict : dict, outf : str, orig_len : int):
     """
     with open(outf, 'w') as f:
         f.write("{} of {} files with predicted objects\n".format(len(summarydict), orig_len))
-        [f.write("{}: {} detections".format(k, v)) for k, v in summarydict.items()]
+        [f.write("{}: {} detections\n".format(k, v)) for k, v in summarydict.items()]
 
 
 def get_site_dirs(path : str) -> bool:
