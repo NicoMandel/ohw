@@ -7,7 +7,7 @@ import pandas as pd
 import rawpy
 # from PIL import Image
 import cv2
-from ultralytics.utils.ops import xywhn2xyxy
+from ultralytics.utils.ops import xywhn2xyxy, xywh2xyxy, xyxy2xywhn
 
 def load_image(imgf: str, convert : bool = False) -> np.ndarray:
     if imgf.lower().endswith(".arw"):
@@ -25,9 +25,12 @@ def save_image(img : np.ndarray, path, cvtcolor : bool = False):
     img = img if not cvtcolor else cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
     cv2.imwrite(path, img)  
 
-def load_arw(fpath : str) -> np.ndarray:
+def load_arw(fpath : str, cvtcolor : bool = True) -> np.ndarray:
     raw = rawpy.imread(fpath)
-    return raw.postprocess(use_camera_wb=True, output_bps=8)
+    img= raw.postprocess(use_camera_wb=True, output_bps=8)
+    # img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB) if cvtcolor else img
+    return img
+
 
 def load_label(label_f : str):
     return np.genfromtxt(label_f, delimiter=' ')
@@ -51,7 +54,6 @@ def write_summary(summarydict : dict, outf : str, orig_len : int):
         f.write("{} of {} files with predicted objects\n".format(len(summarydict), orig_len))
         [f.write("{}: {} detections\n".format(k, v)) for k, v in summarydict.items()]
 
-
 def get_site_dirs(path : str) -> bool:
     """
         Function to return site dirs by looking for <images> and <labels> subdir.
@@ -68,6 +70,26 @@ def _has_img_subdir(path : str) -> bool:
 
 def _has_label_subdir(path : str) -> bool:
     pass
+
+def convert_bbox_coco2yolo(img_w : int, img_h : int, xywh_arr : np.ndarray) -> np.ndarray:
+    # xyxy = xywh2xyxy(xywh_arr)
+    # xywhn = xyxy2xywhn(xyxy, img_w, img_h)
+    xywhn_alt = np.c_[xywh_arr[:,0] / img_w,
+                        xywh_arr[:,1] / img_h,
+                        xywh_arr[:,2] / img_w,
+                        xywh_arr[:,3] / img_h]
+    return xywhn_alt
+
+def convert_pred(pred):
+    img_w = pred.image_width
+    img_h = pred.image_height
+    xywh_arr = np.asarray([bbox.to_coco_annotation().bbox for bbox in pred.object_prediction_list])
+    cats = np.array([bbox.category.id for bbox in pred.object_prediction_list])   # bbox.score.value,
+    xywhn_arr = convert_bbox_coco2yolo(img_w, img_h, xywh_arr)
+    yolo_bboxes = np.c_[cats, xywhn_arr]
+    
+    # if not yolo_bboxes: yolo_bboxes = None
+    return yolo_bboxes
 
 def det_to_bb(shape : tuple, detections : np.ndarray) -> list:
     """
@@ -121,7 +143,7 @@ def get_name_from_path(path : str) -> str:
     """
         Function to get the <name> of a model from a path. Because the name is always in front of weights/best.pt
     """
-    return os.path.normpath(path).split(os.sep)[-3]
+    return os.path.normpath(os.readlink(path)).split(os.sep)[-3]
 
 
 def param_dict_from_name(filename : str, separator : str = "-") -> dict:

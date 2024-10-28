@@ -17,12 +17,12 @@ def parse_args():
     parser.add_argument("-r", "--recursive", action="store_true", help="Boolean value. If given, will look recursively for subfolders <images> and <labels> and add them to the set.")
     return parser.parse_args()
 
-def annotate_image(img : np.ndarray, detections : np.ndarray) -> np.ndarray:
+def annotate_image(img : np.ndarray, detections : np.ndarray, line_width : int = None, font_size : int =None) -> np.ndarray:
         # https://docs.ultralytics.com/usage/simple-utilities/#horizontal-bounding-boxes
         ann = Annotator(
             img,
-            line_width=None,  # default auto-size
-            font_size=None,  # default auto-size
+            line_width=line_width,  # default auto-size
+            font_size=font_size,  # default auto-size
             font="Arial.ttf",  # must be ImageFont compatible
             pil=False,  # use PIL, otherwise uses OpenCV
         )
