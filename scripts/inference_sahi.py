@@ -10,7 +10,7 @@ from sahi.predict import get_sliced_prediction
 
 from display_dataset import annotate_image
 from ohw.dataset import DisplayDataset
-from ohw.utils import param_dict_from_name, get_site_dirs, save_image, save_label, write_summary, convert_pred
+from ohw.utils import param_dict_from_name, save_image, save_label, write_summary, convert_pred, plot_coco
 
 # https://docs.ultralytics.com/guides/sahi-tiled-inference/#batch-prediction
 def parse_args():
@@ -23,7 +23,7 @@ def parse_args():
     parser.add_argument("-s", "--summary", action="store_true", help="If given, will create summary statistics - file with count of instances per image and list of images with detections.")
     parser.add_argument("-v", "--visualise", action="store_true", help="If true, will also write <model_name>/dataset/<visualisations> folder.")
     
-    parser.add_argument("--confidence", default=0.1, type=float, help="Cutoff Confidence, under which detections will be discarded. Default 0.5")
+    parser.add_argument("--confidence", default=0.3, type=float, help="Cutoff Confidence, under which detections will be discarded. Default 0.5")
     parser.add_argument("--ratio", default=0.3, type=float, help="Overlap ratio, vertical as well as horizontal. Default 0.3")
     parser.add_argument("--size", default=1280, type=int, help="Model size to be used for inference. Defaults to 1280.")
     return parser.parse_args()
@@ -58,7 +58,6 @@ def sahi(input_dir : str, model_p : str, output : str, name : str, summary : boo
     for ds_item in tqdm(ds, leave=True):
         img = ds_item[0]
         img_n = ds_item[1]
-        print("Reading image: {}".format(img_n))
         # save_image(img, "sometest.png") # ! this resulted that it only worked with conversion
         result = get_sliced_prediction(
             Image.fromarray(img, mode="RGB"),
@@ -68,20 +67,22 @@ def sahi(input_dir : str, model_p : str, output : str, name : str, summary : boo
             overlap_height_ratio=overlap,
             overlap_width_ratio=overlap
             )
-        # TODO this section
+
         if result.object_prediction_list:
             labels = convert_pred(result)
             labelf = outdir_l / (img_n + ".txt")
-            # save_label(labels, labelf)
+            save_label(labels, labelf)
             summary[img_n] = labels.shape[0]
             # if visualisations are asked for, output them too
             # if visualise:
             img_w_bboxes = annotate_image(img, labels, line_width=2, font_size=6)
             visf = outdir_v / (img_n + ".jpg") 
-            # save_image(img_w_bboxes, str(visf))
-            plt.imshow(img_w_bboxes)
-            plt.show()
-            
+            save_image(img_w_bboxes, str(visf), cvtcolor=True)
+            # print("Reading image: {}".format(img_n))
+            # save_image(img_w_bboxes, "testimg.png")
+            # plt.imshow(img_w_bboxes)
+            # plt.show()
+            # plot_coco(img, result)
             # get summary statistics
             summary[img_n] = labels.shape[0]
     print("Saved {} files with detections from {} of original dataset to {}".format(len(summary), len(ds), outdir_l))    

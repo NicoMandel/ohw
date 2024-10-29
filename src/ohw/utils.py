@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import rawpy
 # from PIL import Image
+import matplotlib.pyplot as plt
 import cv2
 from ultralytics.utils.ops import xywhn2xyxy, xywh2xyxy, xyxy2xywhn
 
@@ -72,13 +73,17 @@ def _has_label_subdir(path : str) -> bool:
     pass
 
 def convert_bbox_coco2yolo(img_w : int, img_h : int, xywh_arr : np.ndarray) -> np.ndarray:
-    # xyxy = xywh2xyxy(xywh_arr)
+    """
+        https://albumentations.ai/docs/getting_started/bounding_boxes_augmentation/#coco
+    """
+    xyc_wh = np.c_[ (xywh_arr[:,0] + (xywh_arr[:,2] / 2)) / img_w,
+                    (xywh_arr[:,1] + (xywh_arr[:,3] /2)) / img_h,
+                    xywh_arr[:,2] / img_w,
+                    xywh_arr[:,3] / img_h
+                    ]
+    # xyxy = xywh2xyxy(xyc_wh)
     # xywhn = xyxy2xywhn(xyxy, img_w, img_h)
-    xywhn_alt = np.c_[xywh_arr[:,0] / img_w,
-                        xywh_arr[:,1] / img_h,
-                        xywh_arr[:,2] / img_w,
-                        xywh_arr[:,3] / img_h]
-    return xywhn_alt
+    return xyc_wh
 
 def convert_pred(pred):
     img_w = pred.image_width
@@ -91,6 +96,19 @@ def convert_pred(pred):
     # if not yolo_bboxes: yolo_bboxes = None
     return yolo_bboxes
 
+def plot_coco(img : np.ndarray, results):
+    img_w_annot = np.copy(img)
+    for bbox in results.object_prediction_list:
+        cc_bb = bbox.to_coco_annotation().bbox
+        x1 = int(np.floor(cc_bb[0]))
+        y1 = int(np.floor(cc_bb[1]))
+        x2 = int(np.ceil(x1 + cc_bb[2]))
+        y2 = int(np.ceil(y1 + cc_bb[3]))
+        cv2.rectangle(img_w_annot, (x1, y1), (x2, y2), color=(255, 0,0), thickness=2)
+
+    plt.imshow(img_w_annot)
+    plt.show()
+
 def det_to_bb(shape : tuple, detections : np.ndarray) -> list:
     """
         centroid x, centroid y, bb width, bb height
@@ -102,7 +120,7 @@ def det_to_bb(shape : tuple, detections : np.ndarray) -> list:
     """
     if len(detections.shape) == 1:
         detections = detections[np.newaxis,:]
-    img_w, img_h = shape[:2]
+    img_h, img_w = shape[:2]
     det_xyxy = xywhn2xyxy(detections[:,1:], img_w, img_h)
     det = np.c_[detections[:,0], det_xyxy]
     return det
