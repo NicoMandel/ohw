@@ -1,7 +1,9 @@
 import os.path
 from argparse import ArgumentParser
 from ultralytics import YOLO, settings
+import numpy as np
 from ohw.utils import append_to_xlsx, get_model_params
+from ultralytics.utils.metrics import DetMetrics
 
 def parse_args():
     parser = ArgumentParser(description="Script for testing a model on a specified dataset.")
@@ -21,8 +23,18 @@ def test_model(model : YOLO, data_path, project : str = None, name : str = None)
         project=project,
         name=name 
         )
-
     return metrics, model
+
+def find_conf(metrics : DetMetrics):
+    """
+        Function to find the confidence where the F1 score is the highest on the test dataset. 
+        Ballpark and underestimated. See: https://github.com/ultralytics/ultralytics/blob/f2a7a29e531ad029255c8ec180ff65de24f42e8d/ultralytics/yolo/utils/metrics.py#L406
+    """
+    f1c_id = metrics.curves.index('F1-Confidence(B)')
+    f1c = metrics.curves_results[f1c_id]
+    f1_max = np.argmax(f1c[1])
+    conf = f1c[0][f1_max-1]
+    return conf
 
 if __name__=="__main__":
     args = parse_args()
@@ -38,9 +50,12 @@ if __name__=="__main__":
 
     # training settings: https://docs.ultralytics.com/modes/train/#train-settings
     metrics, model = test_model(model, data_path, project="results", name=model_name)
-    
+    confidence = find_conf(metrics)
+
     if args.save:
         out_dict = {**param_dict, **metrics.results_dict}
+        # also add the confidence on the test dataset to the metrics.
+        out_dict["Confidence"] = confidence
         xlsxf = os.path.join(basedir, args.save)
         append_to_xlsx(model_name, out_dict, xlsxf)
     else:
