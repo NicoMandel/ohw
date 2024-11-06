@@ -9,14 +9,17 @@
 # max job length (D-HH:MM), name, log locations
 #SBATCH -t 0-20:51
 #SBATCH --job-name=yoloTrain
-#SBATCH --err=/mnt/scratch_lustre/<your_scratch_dir>/jobLogs/job-%j.err
-#SBATCH --output/mnt/scratch_lustre/<your_scratch_dir>/jobLogs/job-%j.out
+#SBATCH --err=/mnt/scratch_lustre/hawkweed_drone_scratch/log/job-%j.err
+#SBATCH --output/mnt/scratch_lustre/hawkweed_drone_scratch/log/job-%j.out
 
 # alternative for selecting specific node: #SBATCH --nodelist=<node-name>
 module purge 
 module load go singularity
 
 # structure: --bind <host_directory>:<directory_in_container>
-singularity exec --nv --bind /mnt/scratch_lustre/<your_scratch-dir>/<data_dir>:/home/ubunu/data/ \
-        --bind /mnt/scratch_lustre/<your_scratch-dir>/saves:/home/ubuntu/saves \
-        /mnt/scratch_lustre/<your_scratch-dir>/singularity/<container>.simg python3 -u train.py     # actual training container
+singularity exec --nv --bind /mnt/scratch_lustre/hawkweed_drone_scratch/data:/home/ubuntu/datasets/ \
+        --bind /home/hathenbd/scripts/hawkweed/ohw/scripts:/home/ubuntu/ \
+        --bind /home/hathenbd/scripts/hawkweed/ohw/src/ohw:/home/ubuntu/ohw \
+        --bind /home/hathenbd/scripts/hawkweed/ohw/data:/home/ubuntu/data \
+        --bind /mnt/scratch_lustre/hawkweed_drone_scratch/saves:/home/ubuntu/results \
+        /mnt/scratch_lustre/hawkweed_drone_scratch/singularity/<container>.simg python3 -u train.py     # actual training container
