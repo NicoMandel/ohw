@@ -161,7 +161,8 @@ def get_name_from_path(path : str) -> str:
     """
         Function to get the <name> of a model from a path. Because the name is always in front of weights/best.pt
     """
-    return os.path.normpath(os.readlink(path)).split(os.sep)[-3]
+    p = Path(path).resolve()
+    return os.path.normpath(str(p)).split(os.sep)[-3]
 
 
 def param_dict_from_name(filename : str, separator : str = "-") -> dict:
