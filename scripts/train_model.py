@@ -2,7 +2,7 @@ import os.path
 from datetime import datetime
 from argparse import ArgumentParser
 from ultralytics import YOLO, settings
-from test_model import test_model
+from test_model import test_model, find_conf
 from ohw.utils import append_to_xlsx
 
 def parse_args():
@@ -57,9 +57,11 @@ if __name__=="__main__":
     # training settings: https://docs.ultralytics.com/modes/train/#train-settings
     results, model = train_model(model, train_data_path, project="results", name=model_name)
     metrics, model = test_model(model, test_data_path, project="results", name=model_name)
+    confidence = find_conf(metrics)
     
     if args.save:
         out_dict = {**param_dict, **metrics.results_dict}
+        out_dict["Confidence"] = confidence
         xlsxf = os.path.join(basedir, args.save)
         append_to_xlsx(model_name, out_dict, xlsxf)
     else:
