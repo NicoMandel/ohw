@@ -17,8 +17,9 @@ module purge
 module load go singularity
 
 # structure: --bind <host_directory>:<directory_in_container>
-singularity exec --nv --bind /mnt/scratch_lustre/hawkweed_drone_scratch/data_nico:/home/ubuntu/datasets/ \
-        --bind /home/mandeln/ohw/scripts:/home/ubuntu/ \
+# bind base container first and all others below it later!
+singularity exec --nv --bind /home/mandeln/ohw/scripts:/home/ubuntu/ \
+        --bind /mnt/scratch_lustre/hawkweed_drone_scratch/data_nico:/home/ubuntu/datasets \
         --bind /home/mandeln/ohw/src/ohw:/home/ubuntu/ohw \
         --bind /mnt/scratch_lustre/hawkweed_drone_scratch/results_nico:/home/ubuntu/results \
         /mnt/scratch_lustre/hawkweed_drone_scratch/yolo-rawpy.simg python3 -u /home/ubuntu/train_model.py \
