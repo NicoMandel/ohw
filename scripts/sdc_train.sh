@@ -9,8 +9,8 @@
 # max job length (D-HH:MM), name, log locations
 #SBATCH -t 0-20:51
 #SBATCH --job-name=yoloTrain
-#SBATCH --err=/mnt/scratch_lustre/hawkweed_drone_scratch/log/job-%j.err
-#SBATCH --output/mnt/scratch_lustre/hawkweed_drone_scratch/log/job-%j.out
+#SBATCH --err=/mnt/scratch_lustre/hawkweed_drone_scratch/log_nico/job-%j.err
+#SBATCH --output/mnt/scratch_lustre/hawkweed_drone_scratch/log_nico/job-%j.out
 
 # alternative for selecting specific node: #SBATCH --nodelist=<node-name>
 module purge 
