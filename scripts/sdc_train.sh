@@ -17,9 +17,10 @@ module purge
 module load go singularity
 
 # structure: --bind <host_directory>:<directory_in_container>
-singularity exec --nv --bind /mnt/scratch_lustre/hawkweed_drone_scratch/data:/home/ubuntu/datasets/ \
-        --bind /home/hathenbd/scripts/hawkweed/ohw/scripts:/home/ubuntu/ \
-        --bind /home/hathenbd/scripts/hawkweed/ohw/src/ohw:/home/ubuntu/ohw \
-        --bind /home/hathenbd/scripts/hawkweed/ohw/data:/home/ubuntu/data \
-        --bind /mnt/scratch_lustre/hawkweed_drone_scratch/saves:/home/ubuntu/results \
-        /mnt/scratch_lustre/hawkweed_drone_scratch/singularity/<container>.simg python3 -u train.py     # actual training container
+singularity exec --nv --bind /mnt/scratch_lustre/hawkweed_drone_scratch/data_nico:/home/ubuntu/datasets/ \
+        --bind /home/mandeln/ohw/scripts:/home/ubuntu/ \
+        --bind /home/mandeln/ohw/src/ohw:/home/ubuntu/ohw \
+        --bind /mnt/scratch_lustre/hawkweed_drone_scratch/results_nico:/home/ubuntu/results \
+        /mnt/scratch_lustre/hawkweed_drone_scratch/yolo_rawpy.simg python3 -u /home/ubuntu/train_model.py \
+        n datasets/1cm/1cm.yaml 
+        
