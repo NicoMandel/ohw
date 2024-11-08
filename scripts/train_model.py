@@ -35,7 +35,7 @@ if __name__=="__main__":
     args = parse_args()
     
     # Dataset
-    settings.update({"datasets_dir" : "."})
+    settings.update({"datasets_dir" : "/home/ubuntu/"})
     dataset = args.dataset
     test_dataset = args.test if args.test else dataset
     # train_data_path = os.path.join(basedir, "data", "{}.yaml".format(train_dataset))       # https://github.com/ultralytics/ultralytics/issues/8823

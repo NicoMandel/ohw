@@ -10,7 +10,7 @@
 #SBATCH -t 0-20:51
 #SBATCH --job-name=yoloTrain
 #SBATCH --err=/mnt/scratch_lustre/hawkweed_drone_scratch/log_nico/job-%j.err
-#SBATCH --output/mnt/scratch_lustre/hawkweed_drone_scratch/log_nico/job-%j.out
+#SBATCH --output=/mnt/scratch_lustre/hawkweed_drone_scratch/log_nico/job-%j.out
 
 # alternative for selecting specific node: #SBATCH --nodelist=<node-name>
 module purge 
@@ -21,6 +21,6 @@ singularity exec --nv --bind /mnt/scratch_lustre/hawkweed_drone_scratch/data_nic
         --bind /home/mandeln/ohw/scripts:/home/ubuntu/ \
         --bind /home/mandeln/ohw/src/ohw:/home/ubuntu/ohw \
         --bind /mnt/scratch_lustre/hawkweed_drone_scratch/results_nico:/home/ubuntu/results \
-        /mnt/scratch_lustre/hawkweed_drone_scratch/yolo_rawpy.simg python3 -u /home/ubuntu/train_model.py \
+        /mnt/scratch_lustre/hawkweed_drone_scratch/yolo-rawpy.simg python3 -u /home/ubuntu/train_model.py \
         n datasets/1cm/1cm.yaml 
         
