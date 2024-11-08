@@ -1,7 +1,7 @@
 import os
 from datetime import datetime
 from argparse import ArgumentParser
-from ultralytics import YOLO # , settings
+from ultralytics import YOLO, settings
 from test_model import test_model, find_conf
 from ohw.utils import append_to_xlsx, get_dataset_name_from_path, get_size_from_filename
 
@@ -35,6 +35,7 @@ if __name__=="__main__":
     args = parse_args()
     
     # Dataset
+    settings.update({"datasets_dir" : "datasets"})
     dataset = args.dataset
     test_dataset = args.test if args.test else dataset
     # train_data_path = os.path.join(basedir, "data", "{}.yaml".format(train_dataset))       # https://github.com/ultralytics/ultralytics/issues/8823
