@@ -21,6 +21,7 @@ singularity exec --nv --bind /mnt/scratch_lustre/hawkweed_drone_scratch/data_nic
         --bind /home/mandeln/ohw/scripts:/home/ubuntu/ \
         --bind /home/mandeln/ohw/src/ohw:/home/ubuntu/ohw \
         --bind /mnt/scratch_lustre/hawkweed_drone_scratch/results_nico:/home/ubuntu/results \
-        /mnt/scratch_lustre/hawkweed_drone_scratch/yolo-rawpy.simg python3 -u /home/ubuntu/train_model.py \
+        /mnt/scratch_lustre/hawkweed_drone_scratch/yolo-rawpy.simg cd /home/ubuntu && python3 -u train_model.py \
         n datasets/1cm/1cm.yaml 
+        # /home/ubuntu/ prefixed before files
         
