@@ -1,7 +1,0 @@
-path: ../datasets/0.24cm
-train: autosplit_train.txt
-val: autosplit_val.txt 
-test: test
-
-nc: 1
-names: ['ohw']

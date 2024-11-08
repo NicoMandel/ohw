@@ -32,6 +32,12 @@ def load_arw(fpath : str, cvtcolor : bool = True) -> np.ndarray:
     # img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB) if cvtcolor else img
     return img
 
+def get_dataset_name_from_path(yamlpath : str) -> str:
+    return Path(yamlpath).stem
+
+def get_size_from_filename(modelfile : str) -> str:
+    paramd = param_dict_from_name(modelfile)
+    return paramd["model_size"]
 
 def load_label(label_f : str):
     return np.genfromtxt(label_f, delimiter=' ')
