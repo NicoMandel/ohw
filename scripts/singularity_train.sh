@@ -15,7 +15,6 @@ basedir="/media/nico/sdcReplica"
 
 singularity shell --bind "$basedir/appsource/local/hawkweed_drone/ohw/scripts":/home/ubuntu/ \
         --bind "$basedir/appsource/local/hawkweed_drone/ohw/src/ohw":/home/ubuntu/ohw \
-        --bind "$basedir/appsource/local/hawkweed_drone/ohw/data":/home/ubuntu/data \
-        --bind "$basedir/scratch_lustre/datasets/base":/home/ubuntu/datasets\
+        --bind "$basedir/scratch_lustre/datasets/base":/home/ubuntu/datasets \
         --bind "$basedir/scratch_lustre/results/":/home/ubuntu/results \
-        "$basedir/scratch_lustre/yolo.simg"
+        "$basedir/scratch_lustre/yolo-rawpy.simg"
