@@ -14,8 +14,8 @@ basedir="/media/nico/sdcReplica"
 #         --bind /mnt/scratch_lustre/hawkweed_drone_scratch/saves:/home/ubuntu/results \
 #         "$basedir/scratch_lustre/yolo.simg" python3 -u train.py     # actual training container
 
-singularity shell --bind "$basedir/appsource/local/hawkweed_drone/ohw/scripts":/home/ubuntu/ \
+singularity exec --bind "$basedir/appsource/local/hawkweed_drone/ohw/scripts":/home/ubuntu/ \
         --bind "$basedir/appsource/local/hawkweed_drone/ohw/src/ohw":/home/ubuntu/ohw \
         --bind "$basedir/scratch_lustre/datasets/base":/home/ubuntu/datasets \
         --bind "$basedir/scratch_lustre/results/":/home/ubuntu/results \
-        "$basedir/scratch_lustre/yolo-rawpy.simg"
+        "$basedir/scratch_lustre/yolo-rawpy.simg" python3 /home/ubuntu/train_model.py s /home/ubuntu/datasets/1cm/1cm.yaml 
