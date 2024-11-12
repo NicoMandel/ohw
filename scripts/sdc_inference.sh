@@ -21,6 +21,6 @@ module load go singularity
 singularity exec --nv --pwd /home/ubuntu --bind /home/mandeln/ohw/scripts:/home/ubuntu/ \
         --bind /home/mandeln/ohw/src/ohw:/home/ubuntu/ohw \
         --bind /mnt/scratch_lustre/hawkweed_drone_scratch/data_nico/inference:/home/ubuntu/inference \
-        --bind /mnt/scratch_lustre/hawkweed_drone_scratch/models_nico:/home/ubuntu/models \
+        --bind /mnt/scratch_lustre/hawkweed_drone_scratch/results:/home/ubuntu/results \
         /mnt/scratch_lustre/hawkweed_drone_scratch/yolo-rawpy.simg python3 -u inference_sahi.py \
-        inference/images models/1cm_best.pt inference -n singularity_1cm_test -s -v 
+        inference/images results/20241109-n-1cm-1cm/weights/best.pt inference -n singularity_1cm_test -s -v 
