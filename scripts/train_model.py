@@ -58,12 +58,10 @@ if __name__=="__main__":
     results, model = train_model(model, dataset, project="results", name=model_name)
     metrics, model = test_model(model, test_dataset, project="results", name=model_name)
     confidence = find_conf(metrics)
-    
     if args.save:
         out_dict = {**param_dict, **metrics.results_dict}
         out_dict["Confidence"] = confidence
-        xlsxf = os.path.join(basedir, args.save)
-        append_to_xlsx(model_name, out_dict, xlsxf)
-    else:
-        print("Model Results for model: {}".format(model_name))
-        print(metrics.results_dict)
+        append_to_xlsx(model_name, out_dict, args.save)
+    print("Model Results for model: {}".format(model_name))
+    print(metrics.results_dict)
+    print("Confidence at best F1 score: {}".format(confidence))
