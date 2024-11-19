@@ -7,7 +7,7 @@ import torch
 import numpy as np
 
 from torchvision.datasets.vision import VisionDataset
-from ultralytics.data.utils import IMG_FORMATS, FORMATS_HELP_MSG, img2label_paths
+from ultralytics.data.utils import IMG_FORMATS, FORMATS_HELP_MSG #, img2label_paths
 from ohw.utils import load_image, load_label
 
 IMG_FORMATS.add("arw")
@@ -73,7 +73,7 @@ class DisplayLabelsDataset(DisplayDataset):
         """
             method to get label files by using images of super an then cleaning by file existence 
         """
-        label_files = img2label_paths(self.img_list)
+        label_files = [Path(f).stem + ".txt" for f in self.img_list] # img2label_paths(self.img_list)
         clf = [lf for lf in label_files if os.path.exists(os.path.join(self.labeldir, lf))]
         assert len(clf) > 0, "No label files could be found. Double check!"
         return clf
