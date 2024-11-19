@@ -46,30 +46,32 @@ def isinsidecrop(xyxy_crop : np.ndarray, xyxy_bbox : np.ndarray) -> int:
     if _pointInRect(xyxy_crop, xyxy_bbox[2:]): ins_ct += 1
     return ins_ct
 
-def get_start_location(xyxy_bbox : np.ndarray, crop_size : int) -> np.ndarray:
+def get_start_location(xyxy_bbox : np.ndarray, crop_size : int, img_shape) -> np.ndarray:
     """
         Function to generate a starting point for a crop from a bounding box. Generates 2 ints between the starting location of the bbox 
         and the end location of the bbox - 1280
         TODO: make this some form of search? 
     """
-    x_s = np.random.randint(xyxy_bbox[2] - crop_size, xyxy_bbox[0])
-    y_s = np.random.randint(xyxy_bbox[3] - crop_size, xyxy_bbox[1])
+    img_h, img_w = img_shape
+    x_s = np.random.randint(xyxy_bbox[2] - crop_size, min(xyxy_bbox[0], img_w - crop_size))
+    y_s = np.random.randint(xyxy_bbox[3] - crop_size, min(xyxy_bbox[1], img_h - crop_size))
     return x_s, y_s
 
 def complete_crop(crop_xyxy : np.ndarray, crop_size : int, all_dets : dict, img_shape : tuple) -> tuple:
     """
-        Function to get a crop, with no bounding box on the edge
+        Function to get a crop, with no bounding box on the edge.
+        TODO - safeguard here. If too many iterations, drop back and continue with the next item on the bbox list
     """
     redo = True
     while(redo):
-        c_s = get_start_location(crop_xyxy, crop_size)
+        c_s = get_start_location(crop_xyxy, crop_size, img_shape)
         xyxy_crop = c_s[0], c_s[1], c_s[0] + crop_size, c_s[1] + crop_size
         
+        redo = False
         # check for every bbox in the image if it is inside the 
         contained_bboxes = []
         for k, xyxy_bb in all_dets.items():
-            redo = False
-
+            
             # get indicator where the bbox sits. inside, outside, on border?
             indic = isinsidecrop(xyxy_crop, xyxy_bb)
             
@@ -109,6 +111,7 @@ def crop_images(input_dir : str, label_dir : str = None, ds_name : str = None, o
             img_h, img_w = img_shape
             detections = xywhn2xyxy(detections[...,1:], img_w, img_h).astype(np.uint16)
             # sort detections
+            if len(detections.shape) == 1: detections = detections[np.newaxis,:]
             indic = np.lexsort((detections[:,1], detections[:,0]))
             det_sort = detections[indic]
             
