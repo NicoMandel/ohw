@@ -7,9 +7,10 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 
 from ultralytics.utils.ops import xywhn2xyxy
+from ultralytics.utils.plotting import Annotator, colors
+
 from ohw.dataset import DisplayLabelsDataset
 from ohw.utils import save_image, save_label
-from display_dataset import annotate_image
 
 def parse_args():
     parser = ArgumentParser(description="Script for cropping images of a given resolution to include all bounding boxes.")
@@ -53,8 +54,8 @@ def get_start_location(xyxy_bbox : np.ndarray, crop_size : int, img_shape) -> np
         TODO: make this some form of search? 
     """
     img_h, img_w = img_shape
-    x_s = np.random.randint(xyxy_bbox[2] - crop_size, min(xyxy_bbox[0], img_w - crop_size))
-    y_s = np.random.randint(xyxy_bbox[3] - crop_size, min(xyxy_bbox[1], img_h - crop_size))
+    x_s = np.random.randint(xyxy_bbox[2] - crop_size, min(xyxy_bbox[0], img_h - crop_size))
+    y_s = np.random.randint(xyxy_bbox[3] - crop_size, min(xyxy_bbox[1], img_w - crop_size))
     return x_s, y_s
 
 def complete_crop(crop_xyxy : np.ndarray, crop_size : int, all_dets : dict, img_shape : tuple) -> tuple:
@@ -87,6 +88,49 @@ def complete_crop(crop_xyxy : np.ndarray, crop_size : int, all_dets : dict, img_
             
     return c_s, contained_bboxes
 
+def _plot_crop(img, crop_start, contained_bboxes : list, detections_dict : dict, crop_size : int = 1280):
+    """
+        function to plot a crop and the bounding boxes and locations
+    """
+    # whole image
+    crop_img = img.copy()
+    ann1 = Annotator(
+        img, 
+        pil=False,
+        font_size=2,
+        line_width=2
+    )
+    [ann1.box_label(box, "OHW", colors(0, bgr=False)) for box in detections_dict.values()]
+    
+    # crop
+    c_x1 = crop_start[0]
+    c_y1 = crop_start[1]
+    c_x2 = c_x1 + crop_size
+    c_y2 = c_y1 + crop_size
+    crop  = crop_img[c_y1 : c_y2, c_x1 : c_x2]
+    assert crop.shape == (1280, 1280, 3), "Crop not 1280 x 1280. Double check"
+
+    # crop in image
+    ann1.box_label([c_x1, c_y1, c_x2, c_y2], "crop", colors(1, bgr=False))
+    img_w_bboxes = ann1.result()
+
+    # annotating crop
+    ann2 = Annotator(
+        np.ascontiguousarray(crop),
+        pil=False,
+        font_size=2,
+        line_width=2
+    )
+    for bb_id in contained_bboxes:
+        bb_dim = detections_dict[bb_id]
+        bb = [bb_dim[0] - c_x1, bb_dim[1] - c_y1, bb_dim[2] - c_x1, bb_dim[3] - c_y1]
+        ann2.box_label(bb, "OHW", colors(0, bgr=False))
+    
+    crop_w_bboxes = ann2.result()
+    fig, (ax1, ax2) = plt.subplots(1,2)
+    ax1.imshow(img_w_bboxes)
+    ax2.imshow(crop_w_bboxes)
+    plt.show()
 
 
 def crop_images(input_dir : str, label_dir : str = None, ds_name : str = None, output_dir : str = None, crop_size : int = 1280):
@@ -143,12 +187,14 @@ def crop_images(input_dir : str, label_dir : str = None, ds_name : str = None, o
                 # remove all detections that are already allocated to this crop
                 [dets_dict.pop(b_id) for b_id in contained_bboxes if b_id in dets_dict]
                 k += 1
+
+                _plot_crop(img, crop_start, contained_bboxes, detections_dict)
             
             # write the crops with suffix k and bounding boxes out to the directory
             print("For image: {} with {} detections, got {} crops.".format(
                 img_id, detections.shape[0], len(crops)
             ))
-        #     img_w_bboxes = annotate_image(img, detections)
+            # img_w_bboxes = annotate_image(img, detections)
 
         # # if no label -> for false Positives
         # else: 
