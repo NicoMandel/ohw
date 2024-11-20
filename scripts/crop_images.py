@@ -54,9 +54,9 @@ def get_start_location(xyxy_bbox : np.ndarray, crop_size : int, img_shape) -> np
         TODO: make this some form of search? 
     """
     img_h, img_w = img_shape
-    x_s = np.random.randint(xyxy_bbox[2] - crop_size, min(xyxy_bbox[0], img_h - crop_size))
-    y_s = np.random.randint(xyxy_bbox[3] - crop_size, min(xyxy_bbox[1], img_w - crop_size))
-    return x_s, y_s
+    w_s = np.random.randint(max(0, xyxy_bbox[2] - crop_size), min(xyxy_bbox[0], img_w - crop_size))
+    h_s = np.random.randint(max(0, xyxy_bbox[3] - crop_size), min(xyxy_bbox[1], img_h - crop_size))
+    return h_s, w_s
 
 def complete_crop(crop_xyxy : np.ndarray, crop_size : int, all_dets : dict, img_shape : tuple) -> tuple:
     """
@@ -65,8 +65,8 @@ def complete_crop(crop_xyxy : np.ndarray, crop_size : int, all_dets : dict, img_
     """
     redo = True
     while(redo):
-        c_s = get_start_location(crop_xyxy, crop_size, img_shape)
-        xyxy_crop = c_s[0], c_s[1], c_s[0] + crop_size, c_s[1] + crop_size
+        h_s, w_s = get_start_location(crop_xyxy, crop_size, img_shape)
+        xyxy_crop = w_s, h_s, w_s + crop_size, h_s + crop_size
         
         redo = False
         # check for every bbox in the image if it is inside the 
@@ -86,7 +86,7 @@ def complete_crop(crop_xyxy : np.ndarray, crop_size : int, all_dets : dict, img_
             elif indic == 1:
                 contained_bboxes.append(k)
             
-    return c_s, contained_bboxes
+    return (w_s, h_s), contained_bboxes
 
 def _plot_crop(img, crop_start, contained_bboxes : list, detections_dict : dict, crop_size : int = 1280):
     """
@@ -130,6 +130,8 @@ def _plot_crop(img, crop_start, contained_bboxes : list, detections_dict : dict,
     fig, (ax1, ax2) = plt.subplots(1,2)
     ax1.imshow(img_w_bboxes)
     ax2.imshow(crop_w_bboxes)
+    plt.suptitle("Crop at x: {} y: {}".format(c_x1, c_y1))
+    ax2.set_title("{} detections".format(len(contained_bboxes)))
     plt.show()
 
 
