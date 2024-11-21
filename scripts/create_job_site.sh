@@ -1,32 +1,45 @@
 #!/bin/bash
 
+# Start by changing this
+site_location="~/src/csu/OHW_data/SDC_Sites/2312122_PP"
+site_location="/home/nico/src/csu/OHW_data/SDC_Sites/2312122_PP"
+# automated job naming and finding subdirectories
+sitename=$(basename "$site_location")
+mapfile -t flightdirs < <(find "$site_location" -maxdepth 1 -type d -iname "flight*")
+
 # echo all the relevant factors into the base file by structure
-jobsite="testfile"
-echo "#!/bin/bash" >> "$jobsite".sh
-echo "#SBATCH -N 1" >> "$jobsite".sh
-echo "#SBATCH -n 1" >> "$jobsite".sh
-echo "#SBATCH -c 4" >> "$jobsite".sh
-echo "#SBATCH --mem 32G" >> "$jobsite".sh
-echo "#SBATCH --partition=GPU" >> "$jobsite".sh
-echo "#SBATCH --gpus-per-node=1" >> "$jobsite".sh
-echo "#SBATCH --mem 32G" >> "$jobsite".sh
-echo "#SBATCH -t 0-03:59" >> "$jobsite".sh
-echo "#SBATCH --job-name=$jobsite" >> "$jobsite".sh
-echo "#SBATCH --err=/mnt/scratch_lustre/hawkweed_drone_scratch/log_nico-job-%j.err" >> "$jobsite".sh
-echo "#SBATCH --output=/mnt/scratch_lustre/hawkweed_drone_scratch/log_nico/job-%j.out" >> "$jobsite".sh
+for jobsite in "${flightdirs[@]}"; do
+    # create job name
+    jobname=$(basename "$jobsite")
+    jn="$sitename-$jobname"
 
-# module parts
-echo "module purge" >> "$jobsite".sh
-echo "module load go singularity" >> "$jobsite".sh
+    # automatically fill in sbatch file
+    echo "#!/bin/bash" >> "$jn".sh
+    echo "#SBATCH -N 1" >> "$jn".sh
+    echo "#SBATCH -n 1" >> "$jn".sh
+    echo "#SBATCH -c 4" >> "$jn".sh
+    echo "#SBATCH --mem 32G" >> "$jn".sh
+    echo "#SBATCH --partition=GPU" >> "$jn".sh
+    echo "#SBATCH --gpus-per-node=1" >> "$jn".sh
+    echo "#SBATCH --mem 32G" >> "$jn".sh
+    echo "#SBATCH -t 0-03:59" >> "$jn".sh
+    echo "#SBATCH --job-name=$jn" >> "$jn".sh
+    echo "#SBATCH --err=/mnt/scratch_lustre/hawkweed_drone_scratch/log_nico-job-%j.err" >> "$jobsite".sh
+    echo "#SBATCH --output=/mnt/scratch_lustre/hawkweed_drone_scratch/log_nico/job-%j.out" >> "$jobsite".sh
 
-# actual job
-echo "singularity exec --nv --pwd /home/ubuntu --bind /home/mandeln/ohw/scripts:/home/ubuntu/ \
-        --bind /home/mandeln/ohw/src/ohw:/home/ubuntu/ohw \
-        --bind /mnt/scratch_lustre/hawkweed_drone_scratch/data_nico/inference:/home/ubuntu/inference \
-        --bind /mnt/scratch_lustre/hawkweed_drone_scratch/results_nico:/home/ubuntu/results \
-        /mnt/scratch_lustre/hawkweed_drone_scratch/yolo-rawpy.simg python3 -u inference_sahi.py \
-        $jobsite results/20241109-n-1cm-1cm/weights/best.pt inference -n singularity_1cm_test -s -v 
-        " >> "$jobsite".sh
+    # module parts
+    echo "module purge" >> "$jn".sh
+    echo "module load go singularity" >> "$jn".sh
 
-# replace with "sbatch $jobsite.sh"
-cat "$jobsite".sh
+    # actual job - ensure that the directories are correct - input and output!
+    echo "singularity exec --nv --pwd /home/ubuntu --bind /home/mandeln/ohw/scripts:/home/ubuntu/ \
+            --bind /home/mandeln/ohw/src/ohw:/home/ubuntu/ohw \
+            --bind /mnt/scratch_lustre/hawkweed_drone_scratch/data_nico/inference:/home/ubuntu/inference \
+            --bind /mnt/scratch_lustre/hawkweed_drone_scratch/results_nico:/home/ubuntu/results \
+            /mnt/scratch_lustre/hawkweed_drone_scratch/yolo-rawpy.simg python3 -u inference_sahi.py \
+            $jobsite results/20241109-n-1cm-1cm/weights/best.pt inference -n singularity_1cm_test -s -v" >> "$jn".sh
+
+    # replace with "sbatch $jn.sh"
+    cat "$jn".sh
+    rm "$jn".sh
+done
