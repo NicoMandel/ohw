@@ -2,7 +2,7 @@
 
 # Start by changing this
 site_location="~/src/csu/OHW_data/SDC_Sites/2312122_PP"
-site_location="/home/nico/src/csu/OHW_data/SDC_Sites/2312122_PP"
+# site_location="/home/nico/src/csu/OHW_data/SDC_Sites/2312122_PP"
 # automated job naming and finding subdirectories
 sitename=$(basename "$site_location")
 mapfile -t flightdirs < <(find "$site_location" -maxdepth 1 -type d -iname "flight*")
@@ -24,8 +24,8 @@ for jobsite in "${flightdirs[@]}"; do
     echo "#SBATCH --mem 32G" >> "$jn".sh
     echo "#SBATCH -t 0-03:59" >> "$jn".sh
     echo "#SBATCH --job-name=$jn" >> "$jn".sh
-    echo "#SBATCH --err=/mnt/scratch_lustre/hawkweed_drone_scratch/log_nico-job-%j.err" >> "$jobsite".sh
-    echo "#SBATCH --output=/mnt/scratch_lustre/hawkweed_drone_scratch/log_nico/job-%j.out" >> "$jobsite".sh
+    echo "#SBATCH --err=/mnt/scratch_lustre/hawkweed_drone_scratch/log_nico-job-%j.err" >> "$jn".sh
+    echo "#SBATCH --output=/mnt/scratch_lustre/hawkweed_drone_scratch/log_nico/job-%j.out" >> "$jn".sh
 
     # module parts
     echo "module purge" >> "$jn".sh
@@ -37,9 +37,10 @@ for jobsite in "${flightdirs[@]}"; do
             --bind /mnt/scratch_lustre/hawkweed_drone_scratch/data_nico/inference:/home/ubuntu/inference \
             --bind /mnt/scratch_lustre/hawkweed_drone_scratch/results_nico:/home/ubuntu/results \
             /mnt/scratch_lustre/hawkweed_drone_scratch/yolo-rawpy.simg python3 -u inference_sahi.py \
-            $jobsite results/20241109-n-1cm-1cm/weights/best.pt inference -n singularity_1cm_test -s -v" >> "$jn".sh
+            $jobsite results/20241109-n-1cm-1cm/weights/best.pt inference -n \"$sitename/$jobname\" -s -v" >> "$jn".sh
 
-    # replace with "sbatch $jn.sh"
-    cat "$jn".sh
+    # choose between sbatch "$jn.sh" or cat "$jn.sh"
+    sbatch "$jn.sh"
+    # cat "$jn".sh
     rm "$jn".sh
 done
