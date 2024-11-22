@@ -17,18 +17,18 @@ def parse_args():
     parser = ArgumentParser(description="Script for displaying the images for a site with associated labels.")
     parser.add_argument("input", type=str, help="Location of the input folder, as root. Will find <images> and <labels> subfolders.")
     parser.add_argument("model", type=str, help="Model Path. Will load a model and do predictions.")
-    parser.add_argument("output", type=str, help="Output location for the label files. Will create<model_name>/<labels> subfolders here.")
+    parser.add_argument("output", type=str, help="Output location for the label files. Will create <model_name>/<labels> subfolders here.")
     
     parser.add_argument("-n", "--name", type=str, default=None, help="Name of the dataset to be used inside the <model_name>/dataset/<labels> folder. If none given, will use folder name of ds")
     parser.add_argument("-s", "--summary", action="store_true", help="If given, will create summary statistics - file with count of instances per image and list of images with detections.")
     parser.add_argument("-v", "--visualise", action="store_true", help="If true, will also write <model_name>/dataset/<visualisations> folder.")
     
-    parser.add_argument("--confidence", default=0.3, type=float, help="Cutoff Confidence, under which detections will be discarded. Default 0.5")
+    parser.add_argument("--confidence", default=0.11, type=float, help="Cutoff Confidence, under which detections will be discarded. Default 0.11")
     parser.add_argument("--ratio", default=0.3, type=float, help="Overlap ratio, vertical as well as horizontal. Default 0.3")
     parser.add_argument("--size", default=1280, type=int, help="Model size to be used for inference. Defaults to 1280.")
     return parser.parse_args()
 
-def sahi(input_dir : str, model_p : str, output : str, name : str, summary : bool, visualise : bool, conf_thresh: float = 0.5, overlap : float = 0.3, model_size : int = 1280, ):
+def sahi(input_dir : str, model_p : str, output : str, name : str, summary : bool, visualise : bool, conf_thresh: float = 0.5, overlap : float = 0.3, model_size : int = 1280):
     # Model
     model_params = param_dict_from_name(model_p)
     model_name = "-".join(list(model_params.values()))
@@ -55,7 +55,8 @@ def sahi(input_dir : str, model_p : str, output : str, name : str, summary : boo
     # Setup model
     ds = DisplayDataset(input_dir, img_dir=None)
     summary = {}
-    for ds_item in tqdm(ds, leave=True):
+    print("Performing inference on {} images".format(len(ds)))
+    for ds_item in tqdm(ds):
         img = ds_item[0]
         img_n = ds_item[1]
         # save_image(img, "sometest.png") # ! this resulted that it only worked with conversion

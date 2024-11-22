@@ -28,7 +28,7 @@ for jobsite in "${flightdirs[@]}"; do
     echo "#SBATCH --partition=GPU" >> "$jn".sh
     echo "#SBATCH --gpus-per-node=1" >> "$jn".sh
     echo "#SBATCH --mem 32G" >> "$jn".sh
-    echo "#SBATCH -t 0-03:59" >> "$jn".sh
+    echo "#SBATCH -t 0-05:59" >> "$jn".sh
     echo "#SBATCH --job-name=\"$jn\"" >> "$jn".sh
     echo "#SBATCH --err=$base_shared_dir/log_nico/job-%j.err" >> "$jn".sh
     echo "#SBATCH --output=$base_shared_dir/log_nico/job-%j.out" >> "$jn".sh
@@ -44,7 +44,7 @@ for jobsite in "${flightdirs[@]}"; do
             --bind $base_shared_dir/inference_out:/home/ubuntu/inference_out \
             --bind $base_shared_dir/results_nico:/home/ubuntu/results \
             $base_shared_dir/yolo-rawpy.simg python3 -u inference_sahi.py \
-            inference results/20241109-n-1cm-1cm/weights/best.pt inference_out -n \"$sitename/$jobname\" -s -v" >> "$jn".sh
+            inference results/20241109-n-1cm-1cm/weights/best.pt inference_out -n \"$sitename/$jobname\" -s -v --confidence 0.3" >> "$jn".sh
 
     # choose between sbatch "$jn.sh" or cat "$jn.sh"
     sbatch "$jn.sh"
