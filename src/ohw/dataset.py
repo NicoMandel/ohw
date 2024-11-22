@@ -5,6 +5,7 @@ import glob
 from PIL import Image
 import torch
 import numpy as np
+import pandas as pd
 
 from torchvision.datasets.vision import VisionDataset
 from ultralytics.data.utils import IMG_FORMATS, FORMATS_HELP_MSG #, img2label_paths
@@ -77,3 +78,25 @@ class DisplayLabelsDataset(DisplayDataset):
         clf = [lf for lf in label_files if os.path.exists(os.path.join(self.labeldir, lf))]
         assert len(clf) > 0, "No label files could be found. Double check!"
         return clf
+    
+class GPSDataset(DisplayDataset):
+    """
+        Dataset for GPS tagging. Needs a csv file with image ids.
+    """
+
+    def __init__(self, root, csv_file : str, img_dir = "visualisations") -> VisionDataset:
+        super().__init__(root, img_dir)
+
+        # todo : load csv file into memory
+        self.gps_data = pd.read_csv(csv_file, index_col=0, header=0)
+        print("Test debug line")
+
+    def __getitem__(self, index: int) -> Tuple[Image.Any, str]:
+        img, img_id = super().__getitem__(index) #[index]
+        lid = img_id + ".txt"
+        lf = os.path.join(self.labeldir, lid)
+
+        labelarr = load_label(lf) if os.path.exists(lf) else None
+        return img, labelarr, img_id
+    
+
