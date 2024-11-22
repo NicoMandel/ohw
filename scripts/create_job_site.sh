@@ -30,8 +30,8 @@ for jobsite in "${flightdirs[@]}"; do
     echo "#SBATCH --mem 32G" >> "$jn".sh
     echo "#SBATCH -t 0-05:59" >> "$jn".sh
     echo "#SBATCH --job-name=\"$jn\"" >> "$jn".sh
-    echo "#SBATCH --err=$base_shared_dir/log_nico/job-%j.err" >> "$jn".sh
-    echo "#SBATCH --output=$base_shared_dir/log_nico/job-%j.out" >> "$jn".sh
+    echo "#SBATCH --err=$base_shared_dir/log_nico/inference/job-%j.err" >> "$jn".sh
+    echo "#SBATCH --output=$base_shared_dir/log_nico/inference/job-%j.out" >> "$jn".sh
 
     # module parts
     echo "module purge" >> "$jn".sh
