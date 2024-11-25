@@ -22,5 +22,5 @@ singularity exec --nv --pwd /home/ubuntu --bind /home/mandeln/ohw/scripts:/home/
         --bind /mnt/scratch_lustre/hawkweed_drone_scratch/data_nico:/home/ubuntu/datasets \
         --bind /home/mandeln/ohw/src/ohw:/home/ubuntu/ohw \
         --bind /mnt/scratch_lustre/hawkweed_drone_scratch/results_nico:/home/ubuntu/results \
-        /mnt/scratch_lustre/hawkweed_drone_scratch/yolo-rawpy.simg python3 -u train_model.py \
-        n datasets/1cm/1cm.yaml         
+        /mnt/scratch_lustre/hawkweed_drone_scratch/yolo-openpyxl.simg python3 -u train_model.py \
+        m datasets/1cm/1cm.yaml --save results/model_res.xlsx         
