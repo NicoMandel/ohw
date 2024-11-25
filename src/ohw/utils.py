@@ -138,12 +138,12 @@ def append_to_xlsx(key, results_dict : dict, xlsx_f : str) -> bool:
     )
     try:
         if os.path.exists(xlsx_f):
-            df_prev = pd.read_excel(open(xlsx_f, 'rb'), header=0)
+            df_prev = pd.read_excel(open(xlsx_f, 'rb'), header=0, index_col=0)
             result = pd.concat([df_prev, df])
         else:
             result = df
         with pd.ExcelWriter(xlsx_f) as writer:
-            result.to_excel(writer, index=0)
+            result.to_excel(writer)
         return True
     except OSError as ose:
         print(ose)
