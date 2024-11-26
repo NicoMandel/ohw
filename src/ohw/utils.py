@@ -1,14 +1,13 @@
 from typing import Tuple
 import os.path
-from datetime import datetime
+import subprocess
 from pathlib import Path
 import numpy as np
 import pandas as pd
 import rawpy
-# from PIL import Image
 import matplotlib.pyplot as plt
 import cv2
-from ultralytics.utils.ops import xywhn2xyxy, xywh2xyxy, xyxy2xywhn
+from ultralytics.utils.ops import xywhn2xyxy
 
 def load_image(imgf: str, convert : bool = False) -> np.ndarray:
     if imgf.lower().endswith(".arw"):
@@ -204,3 +203,21 @@ def get_model_params(args) -> Tuple[dict, str]:
     param_dict["test_dataset"] = args.dataset
     model_name = "-".join(list(param_dict.values()))
     return param_dict, model_name
+
+def geotag_image(img_path : np.ndarray, geotag : pd.Series) :
+    """
+        Function to geotag an image with the exif tool   
+    """
+    # metad = _format_gps_metadata(geotag)
+    lat = geotag['latitude [decimal degrees]']
+    long = geotag['longitude [decimal degrees]']
+    command=[
+        "exiftool",
+        f"-GPSLatitude={lat}",
+        f"-GPSLatitudeRef={'N' if lat >= 0 else 'S'}",
+        f"-GPSLongitude={long}",
+        f"-GPSLongitudeRef={'E' if long >= 0 else 'W'}",
+        "-overwrite_original",
+        img_path
+    ]
+    subprocess.run(command)

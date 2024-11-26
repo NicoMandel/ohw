@@ -87,16 +87,19 @@ class GPSDataset(DisplayDataset):
     def __init__(self, root, csv_file : str, img_dir = "visualisations") -> VisionDataset:
         super().__init__(root, img_dir)
 
-        # todo : load csv file into memory
-        self.gps_data = pd.read_csv(csv_file, index_col=0, header=0)
-        print("Test debug line")
+        # cleaning and loading csv into memory
+        gps_data = pd.read_csv(csv_file, index_col=0, header=0)
+        self.gps_data = self._clean_gps_file(gps_data)
 
-    def __getitem__(self, index: int) -> Tuple[Image.Any, str]:
-        img, img_id = super().__getitem__(index) #[index]
-        lid = img_id + ".txt"
-        lf = os.path.join(self.labeldir, lid)
-
-        labelarr = load_label(lf) if os.path.exists(lf) else None
-        return img, labelarr, img_id
+    def __getitem__(self, index: int) -> Tuple[Image.Any, pd.Series, str]:
+        imgf = self.img_list[index]
+        img_id = Path(imgf).stem
+        geodata = self.gps_data.loc[img_id]
+        return imgf, geodata, img_id
     
-
+    def _clean_gps_file(self, gps_data : pd.DataFrame) -> pd.DataFrame:
+        """
+            Function to clean the DataFrame to make it more accessible
+        """
+        gps_data.index = gps_data.index.str.replace('.JPG', '', case=False)
+        return gps_data
