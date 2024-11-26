@@ -149,6 +149,17 @@ def append_to_xlsx(key, results_dict : dict, xlsx_f : str) -> bool:
         print(ose)
         return False
     
+def get_model_from_xlsx(xlsx_path : str, resolution : str, metric : str = 'fitness') -> tuple:
+    """
+        function to get confidence and best model nam for a specific resolution from a path.
+        Resolution should be a string with either 1cm or 024cm in it
+    """
+    df = pd.read_excel(open(xlsx_path, 'rb'), header=0, index_col=0)
+    subdf = df[df['test_dataset'] == resolution]
+    max_id = subdf[metric].idxmax()
+    confidence = subdf.loc[max_id, "Confidence"]
+    return max_id, confidence
+
 # def load_arw(fpath : str) -> np.ndarray:
 #     """
 #         Loading an ARW image. Thanks to Rob

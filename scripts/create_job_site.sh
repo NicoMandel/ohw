@@ -7,6 +7,8 @@ base_shared_dir="/mnt/scratch_lustre/hawkweed_drone_scratch"
 # Start by changing this
 site_location="/mnt/load/aerial/drone_uav/2023-24/NPWS_OHW_4/23.12.18 - Yarrabee North"
 # site_location="/home/nico/src/csu/OHW_data/SDC_Sites/2312122_PP"
+resolution="024cm" # alternative -> "1cm"
+model_registry="results/model_res.xlsx"
 
 # automated job naming and finding subdirectories
 sitename=$(basename "$site_location")
@@ -28,7 +30,7 @@ for jobsite in "${flightdirs[@]}"; do
     echo "#SBATCH --partition=GPU" >> "$jn".sh
     echo "#SBATCH --gpus-per-node=1" >> "$jn".sh
     echo "#SBATCH --mem 32G" >> "$jn".sh
-    echo "#SBATCH -t 0-05:59" >> "$jn".sh
+    echo "#SBATCH -t 0-08:59" >> "$jn".sh
     echo "#SBATCH --job-name=\"$jn\"" >> "$jn".sh
     echo "#SBATCH --err=$base_shared_dir/log_nico/inference/job-%j.err" >> "$jn".sh
     echo "#SBATCH --output=$base_shared_dir/log_nico/inference/job-%j.out" >> "$jn".sh
@@ -43,8 +45,8 @@ for jobsite in "${flightdirs[@]}"; do
             --bind \"$jobsite\":/home/ubuntu/inference \
             --bind $base_shared_dir/inference_out:/home/ubuntu/inference_out \
             --bind $base_shared_dir/results_nico:/home/ubuntu/results \
-            $base_shared_dir/yolo-rawpy.simg python3 -u inference_sahi.py \
-            inference results/20241109-n-1cm-1cm/weights/best.pt inference_out -n \"$sitename/$jobname\" -s -v --confidence 0.3" >> "$jn".sh
+            $base_shared_dir/yolo-openpyxl.simg python3 -u inference_sahi.py \
+            inference $model_registry $resolution -n \"$sitename/$jobname\" -s -v" >> "$jn".sh
 
     # choose between sbatch "$jn.sh" or cat "$jn.sh"
     sbatch "$jn.sh"
