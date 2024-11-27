@@ -10,8 +10,8 @@ from sahi.predict import get_sliced_prediction
 
 from display_dataset import annotate_image
 from ohw.dataset import DisplayDataset
-from ohw.utils import save_image, save_label, write_summary, convert_pred, get_model_from_xlsx
-from ohw.log_utils import log_exists, read_log, append_to_log
+from ohw.utils import save_image, save_label, convert_pred, get_model_from_xlsx
+from ohw.log_utils import log_exists, read_log, append_to_log, summary_exists, append_to_summary, create_summary, postprocess_summary
 
 # https://docs.ultralytics.com/guides/sahi-tiled-inference/#batch-prediction
 def parse_args():
@@ -63,7 +63,8 @@ def sahi(input_dir : str, registry_f : str, resolution : str, output : str, name
     # Setup model
     ds = DisplayDataset(input_dir, img_dir=None)
     
-    # if summary exists, don't write first line, else write how many images are processed.
+    # if summary file doesn't exist write first line - which model processes how many images
+    if not summary_exists(outdir_p, model_name): create_summary(outdir_p, model_name, len(ds))
 
     print("Performing inference on a total of {} images. Checking if already processed first".format(len(ds)))
     for ds_item in tqdm(ds):
@@ -87,7 +88,6 @@ def sahi(input_dir : str, registry_f : str, resolution : str, output : str, name
             labels = convert_pred(result)
             labelf = outdir_l / (img_n + ".txt")
             save_label(labels, labelf)
-            summary[img_n] = labels.shape[0]
             # if visualisations are asked for, output them too
             # if visualise:
             img_w_bboxes = annotate_image(img, labels, line_width=2, font_size=6)
@@ -95,14 +95,13 @@ def sahi(input_dir : str, registry_f : str, resolution : str, output : str, name
             save_image(img_w_bboxes, str(visf), cvtcolor=True)
             
             # if summary given, append to summary file
-            summary[img_n] = labels.shape[0]
+            if summary:
+                append_to_summary(outdir_p, model_name, img_n, labels.shape[0])
         
         append_to_log(outdir_p, img_n)
-    
-    print("Saved {} files with detections from {} of original dataset to {}".format(len(summary), len(ds), outdir_l))    
     if summary:
-        summaryf = os.path.join(outdir_p, "{}_summary.txt".format(model_name))
-        write_summary(summary, summaryf, orig_len = len(ds))
+        postprocess_summary(outdir_p, model_name, len(ds))
+    
         
 if __name__=="__main__":
     args = parse_args()
