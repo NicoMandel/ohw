@@ -3,6 +3,7 @@ import os.path
 import subprocess
 from pathlib import Path
 import numpy as np
+import torch
 import pandas as pd
 import rawpy
 import matplotlib.pyplot as plt
@@ -221,3 +222,13 @@ def geotag_image(img_path : np.ndarray, geotag : pd.Series) :
         img_path
     ]
     subprocess.run(command)
+
+# testing GPU access
+def test_gpu():
+    print("Cuda is available {}".format(torch.cuda.is_available()))
+    print("Device Count: {}".format(torch.cuda.device_count()))
+    cd = torch.cuda.current_device()
+    print("Current device: {}".format(cd))
+    print("Device name: {}".format(torch.cuda.get_device_name(cd)))
+    print("Device properties: {}".format(torch.cuda.get_device_properties(cd)))
+    

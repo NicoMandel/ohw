@@ -1,6 +1,7 @@
 import os.path
 from pathlib import Path
 from argparse import ArgumentParser
+import torch
 from tqdm import tqdm
 from PIL import Image
 import matplotlib.pyplot as plt
@@ -10,7 +11,7 @@ from sahi.predict import get_sliced_prediction
 
 from display_dataset import annotate_image
 from ohw.dataset import DisplayDataset
-from ohw.utils import save_image, save_label, convert_pred, get_model_from_xlsx
+from ohw.utils import save_image, save_label, convert_pred, get_model_from_xlsx, test_gpu
 from ohw.log_utils import log_exists, read_log, append_to_log, summary_exists, append_to_summary, create_summary, postprocess_summary
 
 # https://docs.ultralytics.com/guides/sahi-tiled-inference/#batch-prediction
@@ -104,5 +105,6 @@ def sahi(input_dir : str, registry_f : str, resolution : str, output : str, name
     
         
 if __name__=="__main__":
+    test_gpu()
     args = parse_args()
     sahi(args.input, args.registry, args.resolution, args.output, args.name, args.summary, args.visualise, args.metric, args.ratio, args.size)
