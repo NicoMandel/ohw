@@ -11,6 +11,7 @@ from sahi.predict import get_sliced_prediction
 from display_dataset import annotate_image
 from ohw.dataset import DisplayDataset
 from ohw.utils import save_image, save_label, write_summary, convert_pred, get_model_from_xlsx
+from ohw.log_utils import log_exists, read_log, append_to_log
 
 # https://docs.ultralytics.com/guides/sahi-tiled-inference/#batch-prediction
 def parse_args():
@@ -54,13 +55,24 @@ def sahi(input_dir : str, registry_f : str, resolution : str, output : str, name
         outdir_v.mkdir(exist_ok=True)
         print("Created: {}\nWill write images to it".format(outdir_v))
 
+    # logging
+    log_list = []
+    if log_exists(outdir_p):
+        log_list = read_log(outdir_p)
+    
     # Setup model
     ds = DisplayDataset(input_dir, img_dir=None)
-    summary = {}
-    print("Performing inference on a total of {} images".format(len(ds)))
+    
+    # if summary exists, don't write first line, else write how many images are processed.
+
+    print("Performing inference on a total of {} images. Checking if already processed first".format(len(ds)))
     for ds_item in tqdm(ds):
         img = ds_item[0]
         img_n = ds_item[1]
+        # continue, if already in log
+        if img_n in log_list:
+            print("Image {} already in log. Skipping.".format(img_n))
+            continue
         # save_image(img, "sometest.png") # ! this resulted that it only worked with conversion
         result = get_sliced_prediction(
             Image.fromarray(img, mode="RGB"),
@@ -81,13 +93,12 @@ def sahi(input_dir : str, registry_f : str, resolution : str, output : str, name
             img_w_bboxes = annotate_image(img, labels, line_width=2, font_size=6)
             visf = outdir_v / (img_n + ".jpg") 
             save_image(img_w_bboxes, str(visf), cvtcolor=True)
-            # print("Reading image: {}".format(img_n))
-            # save_image(img_w_bboxes, "testimg.png")
-            # plt.imshow(img_w_bboxes)
-            # plt.show()
-            # plot_coco(img, result)
-            # get summary statistics
+            
+            # if summary given, append to summary file
             summary[img_n] = labels.shape[0]
+        
+        append_to_log(outdir_p, img_n)
+    
     print("Saved {} files with detections from {} of original dataset to {}".format(len(summary), len(ds), outdir_l))    
     if summary:
         summaryf = os.path.join(outdir_p, "{}_summary.txt".format(model_name))
