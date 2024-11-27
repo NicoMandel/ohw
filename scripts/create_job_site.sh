@@ -30,10 +30,10 @@ for jobsite in "${flightdirs[@]}"; do
     echo "#SBATCH --partition=GPU" >> "$jn".sh
     echo "#SBATCH --gpus-per-node=1" >> "$jn".sh
     echo "#SBATCH --mem 32G" >> "$jn".sh
-    echo "#SBATCH -t 0-00:05" >> "$jn".sh           # !this has been changed
+    echo "#SBATCH -t 0-01:59" >> "$jn".sh           
     echo "#SBATCH --job-name=\"$jn\"" >> "$jn".sh
-    echo "#SBATCH --err=$base_shared_dir/log_nico/test_inf/job-%j.err" >> "$jn".sh      # !this has been changed
-    echo "#SBATCH --output=$base_shared_dir/log_nico/test_inf/job-%j.out" >> "$jn".sh   # !this has been changed
+    echo "#SBATCH --err=$base_shared_dir/log_nico/inference/job-%j.err" >> "$jn".sh
+    echo "#SBATCH --output=$base_shared_dir/log_nico/inference/job-%j.out" >> "$jn".sh
 
     # module parts
     echo "module purge" >> "$jn".sh

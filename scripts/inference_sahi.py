@@ -105,6 +105,6 @@ def sahi(input_dir : str, registry_f : str, resolution : str, output : str, name
     
         
 if __name__=="__main__":
-    test_gpu()
+    # test_gpu()
     args = parse_args()
     sahi(args.input, args.registry, args.resolution, args.output, args.name, args.summary, args.visualise, args.metric, args.ratio, args.size)
