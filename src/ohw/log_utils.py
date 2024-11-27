@@ -57,7 +57,7 @@ def append_to_summary(dirp : str, model_n : str, img_id : str, detections : int)
 def create_summary(dirp : str, model_n : str, img_ct : int) -> None:
     spath = _summarypath(dirp, model_n)
     with open(spath, "w") as f:
-        f.write("Processing {} images with model {}".format(img_ct, model_n))
+        f.write("Processing {} images with model {}\n".format(img_ct, model_n))
     return None
 
 def prepend_summary(dirp : str, model_n : str, ds_len : int, det_count : int):
