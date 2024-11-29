@@ -18,7 +18,7 @@ RUN sed -i '/^torch/d' requirements.txt && sed -i '/^numpy/ s/./#&/' requirement
 # RUN pip install ultralytics
 # RUN python3 -m pip install --upgrade pip
 RUN python3 -m pip install -r requirements.txt
-RUN python3 -m pip install opencv-python rawpy openpyxl pyexiftool
+RUN python3 -m pip install opencv-python rawpy openpyxl pyexiftool simplekml
 
 RUN adduser --disabled-password --gecos '' ubuntu && adduser ubuntu sudo && echo "%sudo ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 

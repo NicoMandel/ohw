@@ -4,7 +4,7 @@ from argparse import ArgumentParser
 from tqdm import tqdm
 
 from ohw.dataset import GPSDataset
-from ohw.utils import geotag_image
+from ohw.utils import geotag_image, create_kml
 
 def parse_args():
     parser = ArgumentParser(description="Script for geotagging images.")
@@ -18,17 +18,12 @@ def geotag_images(input_dir : str, geotag_csv : str = None, kml : bool = False):
     site_dir = os.path.abspath(input_dir)
     gps_ds = GPSDataset(root=site_dir, csv_file=geotag_csv, img_dir="backup")
 
-    # if output is given, write a sister directory
-    site_path = Path(site_dir)    
-    if kml:
-        kml_path = site_path / "kml"
-        kml_path.mkdir(exist_ok=True, parents=True)
-        print("Created directory {} for writing kml files".format(kml_path))
-
     for imgf, geodata, img_id in tqdm(gps_ds, leave=True):
         geotag_image(imgf, geodata)
+        if kml:
+            create_kml(imgf, geodata, gps_ds.imgdir , img_id)
         
 
 if __name__=="__main__":
     args = parse_args()
-    geotag_images(args.input, args.geotag_csv, args.output, args.kml)
+    geotag_images(args.input, args.geotag_csv, args.kml)
