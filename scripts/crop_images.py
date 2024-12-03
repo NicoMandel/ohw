@@ -6,7 +6,7 @@ import numpy as np
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 
-from ultralytics.utils.ops import xywhn2xyxy
+from ultralytics.utils.ops import xywhn2xyxy, xyxy2xywhn
 from ultralytics.utils.plotting import Annotator, colors
 
 from ohw.dataset import DisplayLabelsDataset
@@ -134,6 +134,35 @@ def _plot_crop(img, crop_start, contained_bboxes : list, detections_dict : dict,
     ax2.set_title("{} detections".format(len(contained_bboxes)))
     plt.show()
 
+def save_crops(img : np.ndarray, crops : dict, all_detections : dict, img_id : str,  cropd_i : Path, cropd_l : Path, crop_size : int = 1280):
+    """
+        Saving image crop segments
+    """
+    for i, crop in crops.items():
+        dim, bboxes = crop
+        img_crop = img[dim[1] : dim[1] + crop_size, dim[0] : dim[0] + crop_size]
+
+        # convert crop label dimensions
+        bbox_arr = np.array([all_detections[j] for j in bboxes])
+        cr_label = convert_label_dim(dim, bbox_arr, crop_size)
+        obj_cls = np.zeros(cr_label.shape[0])
+        cr_label = np.c_[obj_cls, cr_label]
+
+        # path manipulation and saving
+        img_p = cropd_i / (img_id + f"_{i}.jpg")
+        save_image(img_crop, str(img_p))
+        label_p = cropd_l / (img_id + f"_{i}.txt")
+        save_label(cr_label, label_p)
+
+    print("Test Debug line")
+
+def convert_label_dim(crop_xy : tuple, bbox_xyxy : np.ndarray, crop_size : int = 1280) -> np.ndarray:
+    """
+        Function to convert the label dimension of the bboxes from the full image to the crop
+    """
+    crop_xyxy = np.asarray([bbox_xyxy[:,0] - crop_xy[0], bbox_xyxy[:,1] - crop_xy[1], bbox_xyxy[:,2] - crop_xy[0], bbox_xyxy[:,3] - crop_xy[1]]).T
+    crop_xywhn = xyxy2xywhn(crop_xyxy.astype(np.float32), w = crop_size, h = crop_size)
+    return crop_xywhn
 
 def crop_images(input_dir : str, label_dir : str = None, ds_name : str = None, output_dir : str = None, crop_size : int = 1280):
     site_dir = os.path.abspath(input_dir)
@@ -190,12 +219,13 @@ def crop_images(input_dir : str, label_dir : str = None, ds_name : str = None, o
                 [dets_dict.pop(b_id) for b_id in contained_bboxes if b_id in dets_dict]
                 k += 1
 
-                _plot_crop(img, crop_start, contained_bboxes, detections_dict)
+                # _plot_crop(img, crop_start, contained_bboxes, detections_dict)
             
             # write the crops with suffix k and bounding boxes out to the directory
             print("For image: {} with {} detections, got {} crops.".format(
                 img_id, detections.shape[0], len(crops)
             ))
+            save_crops(img, crops, detections_dict,  img_id, cropd_i, cropd_l)
             # img_w_bboxes = annotate_image(img, detections)
 
         # # if no label -> for false Positives
