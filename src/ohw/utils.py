@@ -26,8 +26,10 @@ def save_image(img : np.ndarray, path, cvtcolor : bool = False):
     cv2.imwrite(path, img)  
 
 def load_arw(fpath : str, cvtcolor : bool = True) -> np.ndarray:
-    with rawpy.imread(fpath) as raw:
-        img=raw.postprocess(use_camera_wb=True, output_bps=8)
+    raw = rawpy.imread(fpath)
+    img= raw.postprocess(use_camera_wb=True, output_bps=8)
+    # with rawpy.imread(fpath) as raw:
+        # img=raw.postprocess(use_camera_wb=True, output_bps=8)
     # img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB) if cvtcolor else img
     return img
 
