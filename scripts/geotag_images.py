@@ -4,7 +4,7 @@ from argparse import ArgumentParser
 from tqdm import tqdm
 
 from ohw.dataset import GPSDataset
-from ohw.utils import geotag_image, create_kml
+from ohw.geotag_utils import geotag_image, create_kml
 
 def parse_args():
     parser = ArgumentParser(description="Script for geotagging images.")
