@@ -13,17 +13,18 @@ def parse_args():
     parser.add_argument("dataset", type=str, help="Absolute path of the data.yaml file")
     parser.add_argument("-t", "--test", type=str, default=None, help="Test dataset, if different from train dataset file.")
     parser.add_argument("-s", "--save", type=str, default=None, help="Absolute path to file where to store results.")
+    parser.add_argument("-b", "--batch", type=int, default=2, help="Batch Size. defaults to 2")
     return parser.parse_args()
 
 # https://docs.ultralytics.com/modes/train/#usage-examples
-def train_model(model : YOLO, data_path, project : str, name : str):
+def train_model(model : YOLO, data_path, project : str, name : str, batch_size : int =2):
     results = model.train(
         # model = os.path.join(basedir, "yolov8s.pt"),
         # model = "yolov8s.pt",
         data = data_path,
         epochs=300,
         imgsz=1280,
-        batch=2,
+        batch=batch_size,
         cache=False,
         # naming settings
         project=project,
@@ -55,7 +56,7 @@ if __name__=="__main__":
     }
     model_name = "-".join(list(param_dict.values()))
     # training settings: https://docs.ultralytics.com/modes/train/#train-settings
-    results, model = train_model(model, dataset, project="results", name=model_name)
+    results, model = train_model(model, dataset, project="results", name=model_name, batch_size=args.batch)
     metrics, model = test_model(model, test_dataset, project="results", name=model_name)
     confidence = find_conf(metrics)
     if args.save:
