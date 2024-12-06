@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y python3-pip && rm -rf /var/lib/apt/list
 RUN python3 -m pip install --upgrade pip
 
 # Install other Python dependencies
-RUN --mount=type=cache,target=~/.cache/pip python3 -m pip install ultralytics==8.2.81 rawpy openpyxl pyexiftool simplekml 
+RUN --mount=type=cache,target=~/.cache/pip python3 -m pip install ultralytics==8.2.81 sahi rawpy openpyxl pyexiftool simplekml 
 # numpy==1.26.0 
 
 # Remove existing OpenCV and reinstall with contrib version

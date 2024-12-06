@@ -1,6 +1,11 @@
 import sys
 import torch
 import ultralytics
+import sahi
+import tqdm
+import PIL
+import simplekml
+import exiftool
 
 if __name__=="__main__":
     print("Python: {}".format(sys.version))
