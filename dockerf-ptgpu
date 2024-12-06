@@ -1,0 +1,31 @@
+FROM nvcr.io/nvidia/pytorch:23.11-py3
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install dependencies
+RUN apt-get update && apt-get install -y python3-pip && rm -rf /var/lib/apt/lists/*
+
+# Upgrade pip
+RUN python3 -m pip install --upgrade pip
+
+# Install other Python dependencies
+RUN --mount=type=cache,target=~/.cache/pip python3 -m pip install ultralytics==8.2.81 rawpy openpyxl pyexiftool simplekml 
+# numpy==1.26.0 
+
+# Remove existing OpenCV and reinstall with contrib version
+RUN python3 -m pip uninstall -y opencv-python opencv-python-headless opencv-contrib-python
+RUN --mount=type=cache,target=~/.cache/pip python3 -m pip install opencv-contrib-python==4.8.0.74
+
+# Add a user for non-root execution
+RUN adduser --disabled-password --gecos '' ubuntu && adduser ubuntu sudo && \
+    echo "%sudo ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+# Enable color prompts for the 'ubuntu' user
+RUN sed -i 's/#force_color_prompt=yes/force_color_prompt=yes/g' /home/ubuntu/.bashrc
+
+# Set up working environment
+USER ubuntu
+WORKDIR /home/ubuntu
+
+# Copy and test GPU script
+COPY test_gpu.py /home/ubuntu
