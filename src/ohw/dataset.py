@@ -48,7 +48,7 @@ class DisplayDataset(VisionDataset):
     def __len__(self) -> int:
         return len(self.img_list)
 
-    def __getitem__(self, index: int) -> Image.Any:
+    def __getitem__(self, index: int):  # -> Image.Any
         imgf = self.img_list[index]
         img_id = Path(imgf).stem
         img = load_image(imgf)
