@@ -62,7 +62,7 @@ class DisplayLabelsDataset(DisplayDataset):
         self.labeldir = Path(self.root) / ldir if ldir == "labels" else Path(ldir)
         self.label_list = self.get_label_files()
     
-    def __getitem__(self, index: int) -> Tuple[Image.Any, str]:
+    def __getitem__(self, index: int) : # -> Tuple[Image.Any, str]
         img, img_id = super().__getitem__(index) #[index]
         lid = img_id + ".txt"
         lf = os.path.join(self.labeldir, lid)
@@ -91,7 +91,7 @@ class GPSDataset(DisplayDataset):
         gps_data = pd.read_csv(csv_file, index_col=0, header=0)
         self.gps_data = self._clean_gps_file(gps_data)
 
-    def __getitem__(self, index: int) -> Tuple[Image.Any, pd.Series, str]:
+    def __getitem__(self, index: int) : # -> Tuple[Image.Any, pd.Series, str]
         imgf = self.img_list[index]
         img_id = Path(imgf).stem
         geodata = self.gps_data.loc[img_id]
