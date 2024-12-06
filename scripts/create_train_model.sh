@@ -41,7 +41,7 @@ for ms in "${model_size[@]}"; do
             --bind $code_repo/src/ohw:/home/ubuntu/ohw \
             --bind $base_shared_dir/results_nico:/home/ubuntu/results \
             $base_shared_dir/pt-sahi-123.simg python3 -u train_model.py \
-            $ms datasets/$ds/$ds.yaml --save results/model_res.xlsx -b 4" >> "$jn".sh
+            $ms datasets/$ds/$ds.yaml --save results/model_res.xlsx" >> "$jn".sh
 
         # choose between sbatch "$jn.sh" or cat "$jn.sh"
         sbatch "$jn.sh"
