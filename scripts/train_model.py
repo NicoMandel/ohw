@@ -8,8 +8,8 @@ from test_model import test_model, find_conf
 from ohw.utils import append_to_xlsx, get_dataset_name_from_path, get_size_from_filename
 
 os.environ["YOLO_VERBOSE"] = "false"
-os.environ["RANK"] = "-1"
-os.environ["LOCAL_RANK"] = "-1"
+# os.environ["RANK"] = "-1"
+# os.environ["LOCAL_RANK"] = "-1"
 os.environ["WORLD_SIZE"] = "-1"
 
 def parse_args():

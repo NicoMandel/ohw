@@ -36,7 +36,9 @@ for ms in "${model_size[@]}"; do
         echo "module load go singularity" >> "$jn".sh
 
         # actual job - ensure that the directories are correct - input and output!
-        echo "singularity exec --nv --pwd /home/ubuntu --bind $code_repo/scripts:/home/ubuntu/ \
+        echo "singularity exec --nv --pwd /home/ubuntu \
+            --env RANK=-1 --env LOCAL_RANK=-1 \
+            --bind $code_repo/scripts:/home/ubuntu/ \
             --bind $base_shared_dir/data_nico:/home/ubuntu/datasets \
             --bind $code_repo/src/ohw:/home/ubuntu/ohw \
             --bind $base_shared_dir/results_nico:/home/ubuntu/results \
