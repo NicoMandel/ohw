@@ -79,7 +79,11 @@ def sahi(input_dir : str, registry_f : str, resolution : str, output : str, name
             torch.cuda.empty_cache()
             # also possible - cuda.memory_stats() - see fn below "empty_cache"
         if debug:
-            print(torch.cuda.memory_stats(device="cuda"))
+            # print(torch.cuda.memory_stats(device="cuda"))
+            print(torch.cuda.memory_summary(device="cuda"))
+            # print("Memory allocated: {}".format(torch.cuda.memory_allocated(device="cuda")))
+            # print("Memory allocated: {}".format(torch.cuda.memory_summary(device="cuda")))
+            # print("Memory allocated: {}".format(torch.cuda.memory_allocated(device="cuda")))
 
         img = ds_item[0]
         img_n = ds_item[1]
