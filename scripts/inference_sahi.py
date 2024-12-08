@@ -27,11 +27,14 @@ def parse_args():
     parser.add_argument("-v", "--visualise", action="store_true", help="If true, will also write <model_name>/dataset/<visualisations> folder.")
     parser.add_argument("-m", "--metric", type=str, default="fitness", help="Metric that is used to select the maximum model from the registry. Defaults to fitness")
 
+    # debug statement
+    parser.add_argument("--debug", action="store_true", help="If given, will log cuda memory.")
+    
     parser.add_argument("--ratio", default=0.3, type=float, help="Overlap ratio, vertical as well as horizontal. Default 0.3")
     parser.add_argument("--size", default=1280, type=int, help="Model size to be used for inference. Defaults to 1280.")
     return parser.parse_args()
 
-def sahi(input_dir : str, registry_f : str, resolution : str, output : str, name : str, summary : bool, visualise : bool, metric : str, overlap : float = 0.3, model_size : int = 1280):
+def sahi(input_dir : str, registry_f : str, resolution : str, output : str, name : str, summary : bool, visualise : bool, metric : str, overlap : float = 0.3, model_size : int = 1280, debug : bool = False):
     # Model
     model_name, conf_thresh = get_model_from_xlsx(registry_f, resolution, metric)
     model_p = os.path.join(os.path.dirname(registry_f) , model_name, 'weights', 'best.pt')
@@ -67,8 +70,17 @@ def sahi(input_dir : str, registry_f : str, resolution : str, output : str, name
     # if summary file doesn't exist write first line - which model processes how many images
     if not summary_exists(outdir_p, model_name): create_summary(outdir_p, model_name, len(ds))
 
+    i = 0
     print("Performing inference on a total of {} images. Checking if already processed first".format(len(ds)))
     for ds_item in tqdm(ds):
+        # memory management
+        i+=1 
+        if (i%10 == 0):
+            torch.cuda.empty_cache()
+            # also possible - cuda.memory_stats() - see fn below "empty_cache"
+        if debug:
+            print(torch.cuda.memory_stats(device="cuda"))
+
         img = ds_item[0]
         img_n = ds_item[1]
         # continue, if already in log
@@ -107,4 +119,4 @@ def sahi(input_dir : str, registry_f : str, resolution : str, output : str, name
 if __name__=="__main__":
     # test_gpu()
     args = parse_args()
-    sahi(args.input, args.registry, args.resolution, args.output, args.name, args.summary, args.visualise, args.metric, args.ratio, args.size)
+    sahi(args.input, args.registry, args.resolution, args.output, args.name, args.summary, args.visualise, args.metric, args.ratio, args.size, args.debug)
