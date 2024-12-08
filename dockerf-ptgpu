@@ -9,11 +9,12 @@ RUN apt-get update && apt-get install -y python3-pip && rm -rf /var/lib/apt/list
 RUN python3 -m pip install --upgrade pip
 
 # Install other Python dependencies
-RUN --mount=type=cache,target=~/.cache/pip python3 -m pip install ultralytics==8.2.81 sahi rawpy openpyxl pyexiftool simplekml 
-# numpy==1.26.0 
+RUN --mount=type=cache,target=~/.cache/pip python3 -m pip install ultralytics==8.2.81 sahi rawpy openpyxl pyexiftool simplekml Pillow==10.4.0
+# numpy==1.26.0 ultralytics==8.3.13
+# ul version on yolo-kml == 8.2.81
 
 # Remove existing OpenCV and reinstall with contrib version
-RUN python3 -m pip uninstall -y opencv-python opencv-python-headless opencv-contrib-python
+RUN python3 -m pip uninstall -y opencv-python opencv-python-headless opencv-contrib-python 
 RUN --mount=type=cache,target=~/.cache/pip python3 -m pip install opencv-contrib-python==4.8.0.74
 
 # Add a user for non-root execution
