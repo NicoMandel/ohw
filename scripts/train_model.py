@@ -1,12 +1,13 @@
 import os
 from datetime import datetime
 from argparse import ArgumentParser
+import torch
 from ultralytics import YOLO, settings
 from test_model import test_model, find_conf
 from ohw.utils import append_to_xlsx, get_dataset_name_from_path, get_size_from_filename
 
 os.environ["YOLO_VERBOSE"] = "false"
-os.environ["RANK"] = "0"
+os.environ["RANK"] = "-1"
 os.environ["WORLD_SIZE"] = "-1"
 
 def parse_args():
@@ -30,7 +31,8 @@ def train_model(model : YOLO, data_path, project : str, name : str, batch_size :
         cache=False,
         # naming settings
         project=project,
-        name=name
+        name=name,
+        device=torch.cuda.current_device()
     )
     return results, model
 
