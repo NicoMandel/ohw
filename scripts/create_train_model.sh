@@ -35,9 +35,12 @@ for ms in "${model_size[@]}"; do
         echo "module purge" >> "$jn".sh
         echo "module load go singularity" >> "$jn".sh
 
+        # Environment variables
+        echo "export SINGULARITYENV_RANK=-1" >> "$jn".sh 
+        echo "export SINGULARITYENV_LOCAL_RANK=-1" >> "$jn".sh
+
         # actual job - ensure that the directories are correct - input and output!
         echo "singularity exec --nv --pwd /home/ubuntu \
-            --env RANK=-1 --env LOCAL_RANK=-1 \
             --bind $code_repo/scripts:/home/ubuntu/ \
             --bind $base_shared_dir/data_nico:/home/ubuntu/datasets \
             --bind $code_repo/src/ohw:/home/ubuntu/ohw \
