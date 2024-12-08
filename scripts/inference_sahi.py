@@ -75,12 +75,14 @@ def sahi(input_dir : str, registry_f : str, resolution : str, output : str, name
     for ds_item in tqdm(ds):
         # memory management
         i+=1 
-        if (i%10 == 0):
+        if (i%50 == 0):
+            print("Clearing memory every {}-th iteration".format(50))
             torch.cuda.empty_cache()
             # also possible - cuda.memory_stats() - see fn below "empty_cache"
-        if debug:
+        if debug and (i % 20 == 0):
             # print(torch.cuda.memory_stats(device="cuda"))
-            print(torch.cuda.memory_summary(device="cuda"))
+            print("Device available stats: {}".format(torch.cuda.mem_get_info()))
+            print(torch.cuda.memory_summary())
             # print("Memory allocated: {}".format(torch.cuda.memory_allocated(device="cuda")))
             # print("Memory allocated: {}".format(torch.cuda.memory_summary(device="cuda")))
             # print("Memory allocated: {}".format(torch.cuda.memory_allocated(device="cuda")))
@@ -92,14 +94,15 @@ def sahi(input_dir : str, registry_f : str, resolution : str, output : str, name
             print("Image {} already in log. Skipping.".format(img_n))
             continue
         # save_image(img, "sometest.png") # ! this resulted that it only worked with conversion
-        result = get_sliced_prediction(
-            Image.fromarray(img, mode="RGB"),
-            detection_model,
-            slice_height=model_size,
-            slice_width=model_size,
-            overlap_height_ratio=overlap,
-            overlap_width_ratio=overlap
-            )
+        with torch.no_grad():
+            result = get_sliced_prediction(
+                Image.fromarray(img, mode="RGB"),
+                detection_model,
+                slice_height=model_size,
+                slice_width=model_size,
+                overlap_height_ratio=overlap,
+                overlap_width_ratio=overlap
+                )
 
         if result.object_prediction_list:
             labels = convert_pred(result)
