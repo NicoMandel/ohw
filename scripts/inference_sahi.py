@@ -77,7 +77,7 @@ def sahi(input_dir : str, registry_f : str, resolution : str, output : str, name
         # memory management
         i+=1 
         if (i%50 == 0):
-            print("Clearing memory and reloading model every {}-th iteration".format(50))
+            print("Iteration {}: Clearing memory and reloading model every {}-th iteration".format(i, 50))
             del detection_model
             torch.cuda.empty_cache()
             detection_model = AutoDetectionModel.from_pretrained(
@@ -114,7 +114,7 @@ def sahi(input_dir : str, registry_f : str, resolution : str, output : str, name
                 )
         end_time = time.time()
         if debug:
-            print("Inference time: {}".format(end_time - st_time))
+            print("Iteration {} Inference time: {}".format(i, end_time - st_time))
         
         st_time = time.time()
         if result.object_prediction_list:
@@ -132,7 +132,7 @@ def sahi(input_dir : str, registry_f : str, resolution : str, output : str, name
                 append_to_summary(outdir_p, model_name, img_n, labels.shape[0])
         end_time = time.time()
         if debug:
-            print("Posprocessing time: {}".format(end_time - st_time))
+            print("Iteration {} Posprocessing time: {}".format(i, end_time - st_time))
         append_to_log(outdir_p, img_n)
     if summary:
         postprocess_summary(outdir_p, model_name, len(ds))
