@@ -5,6 +5,7 @@ import torch
 from tqdm import tqdm
 from PIL import Image
 import matplotlib.pyplot as plt
+import time
 
 from sahi import AutoDetectionModel
 from sahi.predict import get_sliced_prediction
@@ -76,8 +77,15 @@ def sahi(input_dir : str, registry_f : str, resolution : str, output : str, name
         # memory management
         i+=1 
         if (i%50 == 0):
-            print("Clearing memory every {}-th iteration".format(50))
+            print("Clearing memory and reloading model every {}-th iteration".format(50))
+            del detection_model
             torch.cuda.empty_cache()
+            detection_model = AutoDetectionModel.from_pretrained(
+                        model_type="yolov8",
+                        model_path=model_p,
+                        confidence_threshold=conf_thresh,
+                        device="cuda:0",  # or 'cpu'
+            )
             # also possible - cuda.memory_stats() - see fn below "empty_cache"
         if debug and (i % 20 == 0):
             # print(torch.cuda.memory_stats(device="cuda"))
@@ -94,6 +102,7 @@ def sahi(input_dir : str, registry_f : str, resolution : str, output : str, name
             print("Image {} already in log. Skipping.".format(img_n))
             continue
         # save_image(img, "sometest.png") # ! this resulted that it only worked with conversion
+        st_time = time.time()
         with torch.no_grad():
             result = get_sliced_prediction(
                 Image.fromarray(img, mode="RGB"),
@@ -103,7 +112,11 @@ def sahi(input_dir : str, registry_f : str, resolution : str, output : str, name
                 overlap_height_ratio=overlap,
                 overlap_width_ratio=overlap
                 )
-
+        end_time = time.time()
+        if debug:
+            print("Inference time: {}".format(end_time - st_time))
+        
+        st_time = time.time()
         if result.object_prediction_list:
             labels = convert_pred(result)
             labelf = outdir_l / (img_n + ".txt")
@@ -117,7 +130,9 @@ def sahi(input_dir : str, registry_f : str, resolution : str, output : str, name
             # if summary given, append to summary file
             if summary:
                 append_to_summary(outdir_p, model_name, img_n, labels.shape[0])
-        
+        end_time = time.time()
+        if debug:
+            print("Posprocessing time: {}".format(end_time - st_time))
         append_to_log(outdir_p, img_n)
     if summary:
         postprocess_summary(outdir_p, model_name, len(ds))
