@@ -73,7 +73,13 @@ def sahi(input_dir : str, registry_f : str, resolution : str, output : str, name
 
     i = 0
     print("Performing inference on a total of {} images. Checking if already processed first".format(len(ds)))
+    st_time = None
     for ds_item in tqdm(ds):
+        # debugging image loading times
+        if debug and st_time is not None:
+            end_time = time.time()
+            print("Iteration {} image loading time: {}".format(i, end_time - st_time))
+            
         # memory management
         i+=1 
         if (i%50 == 0):
@@ -134,6 +140,7 @@ def sahi(input_dir : str, registry_f : str, resolution : str, output : str, name
         if debug:
             print("Iteration {} Posprocessing time: {}".format(i, end_time - st_time))
         append_to_log(outdir_p, img_n)
+        st_time = time.time()
     if summary:
         postprocess_summary(outdir_p, model_name, len(ds))
     
