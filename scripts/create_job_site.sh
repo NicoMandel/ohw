@@ -40,7 +40,7 @@ for jobsite in "${flightdirs[@]}"; do
 
     # module parts
     echo "module purge" >> "$jn".sh
-    echo "module load go singularity" >> "$jn".sh
+    echo "module load go singularity" >> "$jn".sh       # sstat -j \$SLURM_JOB_ID --format=JobID,MaxRSS,AveRSS,Elapsed
 
     # actual job - ensure that the directories are correct - input and output!
     echo "singularity exec --nv --pwd /home/ubuntu --bind $code_repo/scripts:/home/ubuntu/ \
@@ -52,11 +52,11 @@ for jobsite in "${flightdirs[@]}"; do
             inference $model_registry $resolution inference_out -n \"$sitename/$jobname\" -s -v --debug &" >> "$jn".sh
 
     # memory logging - to identify leak
-    # Memory logging loop
-    echo "while ps -p \$! > /dev/null; do" >> "$jn".sh
-    echo "    sstat -j \$SLURM_JOB_ID --format=JobID,MaxRSS,AveRSS,Elapsed >> $base_shared_dir/log_nico/inference/job-\$SLURM_JOB_ID.memory.log" >> "$jn".sh
-    echo "    sleep 60" >> "$jn".sh
-    echo "done" >> "$jn".sh
+    # # Memory logging loop
+    # echo "while ps -p \$! > /dev/null; do" >> "$jn".sh
+    # echo "    sstat -j \$SLURM_JOB_ID --format=JobID,MaxRSS,AveRSS,Elapsed >> $base_shared_dir/log_nico/inference/job-\$SLURM_JOB_ID.memory.log" >> "$jn".sh
+    # echo "    sleep 60" >> "$jn".sh
+    # echo "done" >> "$jn".sh
 
     # choose between sbatch "$jn.sh" or cat "$jn.sh"
     sbatch "$jn.sh"
