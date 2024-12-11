@@ -1,13 +1,31 @@
 from typing import Tuple
-import os.path
+import os
 from pathlib import Path
 import numpy as np
 import torch
 import pandas as pd
 import rawpy
+import psutil
 import matplotlib.pyplot as plt
 import cv2
 from ultralytics.utils.ops import xywhn2xyxy
+
+# debugging memory usage
+def log_memory_usage(i : int = 0):
+    mem_usage = mem_usage_of_process_tree()
+    print(f"Memory RSS usage at end of iteration {i} including subprocesses: {mem_usage:.2f} MB")  
+    print(f"Virtual memory percentage used: {psutil.virtual_memory().percent}")
+
+def mem_usage_of_process_tree(pid=None):
+    if pid is None:
+        pid = os.getpid()
+    try:
+        parent = psutil.Process(pid)
+        processes = [parent] + parent.children(recursive=True)  
+        total_mem = sum(p.memory_info().rss for p in processes) # RSS = Resident Set Size (physical memory)
+        return total_mem / 1024 ** 2 # in mb
+    except psutil.NoSuchProcess:
+        return 0.0 # terminated process
 
 def load_image(imgf: str, convert : bool = False) -> np.ndarray:
     if imgf.lower().endswith(".arw"):
