@@ -49,7 +49,7 @@ for jobsite in "${flightdirs[@]}"; do
             --bind $base_shared_dir/inference_out:/home/ubuntu/inference_out \
             --bind $base_shared_dir/results_nico:/home/ubuntu/results \
             $base_shared_dir/pt-sahi-123.simg python3 -u inference_sahi.py \
-            inference $model_registry $resolution inference_out -n \"$sitename/$jobname\" -s -v --debug &" >> "$jn".sh
+            inference $model_registry $resolution inference_out -n \"$sitename/$jobname\" -s -v --debug" >> "$jn".sh
 
     # memory logging - to identify leak
     # # Memory logging loop
