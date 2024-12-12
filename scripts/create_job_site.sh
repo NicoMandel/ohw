@@ -96,7 +96,7 @@ for jobsite in "${flightdirs[@]}"; do
     } > "$jn.sh"
 
     # choose between sbatch "$jn.sh" or cat "$jn.sh"
-    jid0=$(sbatch "$jn.sh")
+    jid0=$(sbatch "$jn.sh" | awk '{print $NF}')
 
     # resubmit twice - for breaking case
     echo "$jid0"
