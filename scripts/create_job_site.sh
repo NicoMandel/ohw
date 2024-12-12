@@ -76,7 +76,7 @@ for jobsite in "${flightdirs[@]}"; do
         echo "#SBATCH --partition=GPU" 
         echo "#SBATCH --gpus-per-node=1" 
         echo "#SBATCH --mem 32G" 
-        echo "#SBATCH -t 0-02:59"            
+        echo "#SBATCH -t 0-00:59"            
         echo "#SBATCH --job-name=\"$jn\"" 
         echo "#SBATCH --err=$base_shared_dir/log_nico/inference/job-%j.err" 
         echo "#SBATCH --output=$base_shared_dir/log_nico/inference/job-%j.out" 
@@ -96,7 +96,12 @@ for jobsite in "${flightdirs[@]}"; do
     } > "$jn.sh"
 
     # choose between sbatch "$jn.sh" or cat "$jn.sh"
-    sbatch "$jn.sh"
+    jid0=$(sbatch "$jn.sh")
+
+    # resubmit twice - for breaking case
+    jid1=$(sbatch --depedency=afternotok:$jid0 "$jn.sh")
+    jid2=$(sbatch --depedency=afternotok:$jid1 "$jn.sh")
+
     # cat "$jn".sh
     rm "$jn".sh
 done
