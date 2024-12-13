@@ -7,7 +7,7 @@ from ultralytics import YOLO
 
 from display_dataset import annotate_image
 from ohw.dataset import DisplayDataset
-from ohw.utils import get_site_dirs, param_dict_from_name, save_label, write_summary, save_image
+from ohw.utils import get_site_dirs, param_dict_from_name, save_label, write_summary, save_image, load_image
 
 def parse_args():
     parser = ArgumentParser(description="Script for displaying the images for a site with associated labels.")
@@ -43,8 +43,9 @@ def save_prediction(input_dir : str, output : str, model_p : str, summary : bool
     ds = DisplayDataset(site_dir, img_dir=None)
     summary = {}
     for ds_item in tqdm(ds, leave=True):
-        img = ds_item[0]
+        img_f = ds_item[0]
         img_n = ds_item[1]
+        img = load_image(img_f)
         result = model(img, verbose=False)[0]
         
         # only write output if there is something to output

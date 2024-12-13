@@ -51,8 +51,7 @@ class DisplayDataset(VisionDataset):
     def __getitem__(self, index: int):  # -> Image.Any
         imgf = self.img_list[index]
         img_id = Path(imgf).stem
-        img = load_image(imgf)
-        return img, img_id
+        return imgf, img_id
 
 class DisplayLabelsDataset(DisplayDataset):
     def __init__(self, root : str, img_dir = "images", ldir = "labels") -> None:
@@ -63,10 +62,10 @@ class DisplayLabelsDataset(DisplayDataset):
         self.label_list = self.get_label_files()
     
     def __getitem__(self, index: int) : # -> Tuple[Image.Any, str]
-        img, img_id = super().__getitem__(index) #[index]
+        img_f, img_id = super().__getitem__(index) #[index]
         lid = img_id + ".txt"
         lf = os.path.join(self.labeldir, lid)
-
+        img = load_image(img_f)
         labelarr = load_label(lf) if os.path.exists(lf) else None
         return img, labelarr, img_id
     
@@ -92,8 +91,7 @@ class GPSDataset(DisplayDataset):
         self.gps_data = self._clean_gps_file(gps_data)
 
     def __getitem__(self, index: int) : # -> Tuple[Image.Any, pd.Series, str]
-        imgf = self.img_list[index]
-        img_id = Path(imgf).stem
+        imgf, img_id = super().__getitem__(index) #[index]
         geodata = self.gps_data.loc[img_id]
         return imgf, geodata, img_id
     

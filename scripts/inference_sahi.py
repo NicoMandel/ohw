@@ -11,7 +11,7 @@ from sahi.predict import get_sliced_prediction
 
 from display_dataset import annotate_image
 from ohw.dataset import DisplayDataset
-from ohw.utils import save_image, save_label, convert_pred, get_model_from_xlsx, log_memory_usage
+from ohw.utils import save_image, save_label, convert_pred, get_model_from_xlsx, log_memory_usage, load_image
 from ohw.log_utils import log_exists, read_log, append_to_log, summary_exists, append_to_summary, create_summary, postprocess_summary
 
 # https://docs.ultralytics.com/guides/sahi-tiled-inference/#batch-prediction
@@ -101,13 +101,14 @@ def sahi(input_dir : str, registry_f : str, resolution : str, output : str, name
             # print("Memory allocated: {}".format(torch.cuda.memory_summary(device="cuda")))
             # print("Memory allocated: {}".format(torch.cuda.memory_allocated(device="cuda")))
 
-        img = ds_item[0]
+        img_f = ds_item[0]
         img_n = ds_item[1]
         # continue, if already in log
         if img_n in log_list:
             print("Image {} already in log. Skipping.".format(img_n))
             continue
         # save_image(img, "sometest.png") # ! this resulted that it only worked with conversion
+        img = load_image(img_f)
         st_time = time.time()
         with torch.no_grad():
             result = get_sliced_prediction(
