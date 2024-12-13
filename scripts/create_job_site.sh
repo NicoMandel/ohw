@@ -76,7 +76,7 @@ for jobsite in "${flightdirs[@]}"; do
         echo "#SBATCH --partition=GPU" 
         echo "#SBATCH --gpus-per-node=1" 
         echo "#SBATCH --mem 32G" 
-        echo "#SBATCH -t 0-00:59"            
+        echo "#SBATCH -t 0-01:59"            
         echo "#SBATCH --job-name=\"$jn\"" 
         echo "#SBATCH --err=$base_shared_dir/log_nico/inference/job-%j.err" 
         echo "#SBATCH --output=$base_shared_dir/log_nico/inference/job-%j.out" 
