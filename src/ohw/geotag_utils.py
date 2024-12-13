@@ -45,12 +45,17 @@ def create_kml(img_f : str, geodata : pd.Series, save_dir: str, img_id : str, co
     photo.camera = simplekml.Camera(longitude = geodata['longitude [decimal degrees]'], latitude=geodata['latitude [decimal degrees]'], altitude=geodata["altitude [meter]"],
                                     altitudemode=simplekml.AltitudeMode.clamptoground)
     photo.point.coords= [(geodata["longitude [decimal degrees]"], geodata["latitude [decimal degrees]"])]
+    photo.viewvolume = simplekml.ViewVolume(-25,25,-15,15,1)
+    # save normal kml
+    kml_path = os.path.join(save_dir, "{}.kml".format(img_id))
+    kml.save(kml_path)
+    # add image to save kmz too
     if compress:
         img_f = _compress_img(img_f, save_dir, img_id)
     photo.icon.href = "{}".format(img_f)
-    photo.viewvolume = simplekml.ViewVolume(-25,25,-15,15,1)
-    kml_path = os.path.join(save_dir, "{}.kmz".format(img_id))
-    kml.savekmz(kml_path)
+    kmz_path = os.path.join(save_dir, "{}.kmz".format(img_id))
+    kml.savekmz(kmz_path)
+    
     # remove file after compressing into kmz
     if compress:
         os.remove(img_f)
