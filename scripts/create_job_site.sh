@@ -116,7 +116,8 @@ for jobsite in "${flightdirs[@]}"; do
     # resubmit twice - for breaking case
     echo "$jid0"
     jid1=$(sbatch --dependency=afternotok:$jid0 "$jn.sh" | awk '{print $NF}')
-    jid2=$(sbatch --dependency=afternotok:$jid1 "$jn.sh")
+    jid2=$(sbatch --dependency=afternotok:$jid1 "$jn.sh" | awk '{print $NF}')
+    jid3=$(sbatch --dependency=afternotok:$jid2 "$jn.sh")
 
     # cat "$jn".sh
     rm "$jn".sh
