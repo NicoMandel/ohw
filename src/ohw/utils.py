@@ -236,3 +236,81 @@ def test_gpu():
     print("Device name: {}".format(torch.cuda.get_device_name(cd)))
     print("Device properties: {}".format(torch.cuda.get_device_properties(cd)))
     
+
+def _check_bbox_dim(box: np.ndarray, shape, minval) -> tuple[tuple, tuple]:
+    """
+        box (tuple): The bounding box coordinates (x1, y1, x2, y2).
+        img_h = x
+        img_w = y
+        Function to check whether bounding boxes are appropriately dimensioned and re-dimension if necessary
+    """
+    img_y, img_x = shape[:2]
+    tl = box[2:]
+    br = box[:2]
+    # inflate to minimum if necessary. Check if the dims are outside of the image, if yes, shift the bbox entirely by that.
+    # x-dimesion, width
+    if (br[1] - tl[1]) < minval:
+        ctr = __calc_centroid(br[1], tl[1])
+        l, r = int(ctr - minval / 2), int(ctr + minval / 2)
+        if l < 0:
+            r += 0-l
+            l=0
+        if r > img_y:
+            l -= r-img_y
+            r = img_y
+    else:
+        l = tl[1]
+        r = br[1]
+    
+    # y - dimension. height
+    if (br[0] - tl[0]) < minval:
+        ctr = __calc_centroid(br[0], tl[0])
+        t, b = int(ctr - minval / 2), int(ctr + minval / 2)
+        if t < 0:
+            b += 0-t
+            t = 0
+        if b > img_x:
+            t -= b-img_x
+            b = img_x
+    else:
+        b = br[0]
+        t = tl[0]
+    ntl = (t, l)
+    nbr = (b, r)
+    return ntl, nbr
+
+def __calc_centroid(high : tuple, low: tuple) -> tuple:
+    """
+        Function to calculate the center pixel. can be applied to both dimensions
+    """
+    return int((low + high) /2)
+
+def annotate_image_w_buffer(img : np.ndarray, detections : np.ndarray, rgb : tuple = (0, 0, 255), line_width : int = None, minval : int =10) -> np.ndarray:
+        """
+            function from ultralytics in: plotting.py
+            box (tuple): The bounding box coordinates (x1, y1, x2, y2).
+            p1, p2 = (int(box[0]), int(box[1])), (int(box[2]), int(box[3]))
+            cv2.rectangle(self.im, p1, p2, color, thickness=self.lw, lineType=cv2.LINE_AA)
+        """
+        det_xyxy = det_to_bb(img.shape, detections).astype(np.int32)
+        img_out = img.copy()
+        line_width = 5 if line_width is None else line_width
+        for row in det_xyxy:
+            c_idx, *box = row
+            tl, br = _check_bbox_dim(box, img.shape, minval)
+            cv2.rectangle(img_out, tl, br, rgb , line_width)
+        return img_out
+        # ann = Annotator(
+        #     img,
+        #     line_width=line_width,  # default auto-size
+        #     font_size=font_size,  # default auto-size
+        #     font="Arial.ttf",  # must be ImageFont compatible
+        #     pil=False,  # use PIL, otherwise uses OpenCV
+        # )
+        # bboxes = det_to_bb(img.shape, detections)
+        # for box in bboxes:
+        #     c_idx, *box = box
+        #     label = "OHW"
+        #     ann.box_label(box, label, colors(c_idx, bgr=False))
+        # img_w_bboxes = ann.result()
+        # return img_w_bboxes
