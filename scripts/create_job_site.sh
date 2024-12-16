@@ -19,6 +19,7 @@ usage() {
                 alternatives: , 2023.12.22_Mufflers_Gap, 202.12.23_Long_Plain_Rd_Snowy_Mtns_Hwy_jxn, 2023.12.21_Billmans_Point/
         -r resolution which to process. Must be one of <024cm> or <1cm>. So that the appropriate model can be chosen. Defaults to 024cm
         -m path to model registry file, specifying models that can be chosen. Defaults to '$base_shared_dir/$model_registry' 
+        -p polling interval - set in seconds! To check if folder is still being written to by an upload. Defaults to 5 minutes
         -h display this help message
         
         Example:
@@ -29,14 +30,15 @@ usage() {
 # default values
 resolution="024cm"
 site_location=""
-
+polling_interval=300
 
 # argument parsing
-while getopts 's:r:m:h' flag; do 
+while getopts 's:r:m:p:h' flag; do 
     case "${flag}" in
         s) site_location="${OPTARG}" ;;
         r) resolution="${OPTARG}" ;;
         m) model_registry="${OPTARG}" ;;
+        p) polling_interval="${OPTARG}" ;;
         h) usage 
             exit -1;;
         *) usage
@@ -50,6 +52,19 @@ if [ -z "$site_location" ]; then
     usage
     exit -1
 fi
+
+# Polling interval - check if upload of folder is complete
+# ! does not work - due to restrictions on lsof for non-superusers
+#  echo "Polling $site_location for upload completion..."
+# while true; do
+#     if lsof +D "$site_location" > /dev/null; then
+#         echo "Uploads still in progress..."
+#     else
+#         echo "Upload completed. Proceeding to submit SLURM job"
+#         break
+#     fi
+#     sleep "$polling_interval"
+# done
 
 echo "Site Location: $site_location"
 echo "Resolution: $resolution"
@@ -92,7 +107,7 @@ for jobsite in "${flightdirs[@]}"; do
                 --bind $base_shared_dir/inference_out:/home/ubuntu/inference_out \
                 --bind $base_shared_dir/results_nico:/home/ubuntu/results \
                 $base_shared_dir/pt-sahi-123.simg python3 -u inference_sahi.py \
-                inference $model_registry $resolution inference_out -n \"$sitename/$jobname\" -s -v --debug" 
+                inference $model_registry $resolution inference_out -n \"$sitename/$jobname\" -s -v" 
     } > "$jn.sh"
 
     # choose between sbatch "$jn.sh" or cat "$jn.sh"

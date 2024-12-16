@@ -9,9 +9,8 @@ import time
 from sahi import AutoDetectionModel
 from sahi.predict import get_sliced_prediction
 
-from display_dataset import annotate_image
 from ohw.dataset import DisplayDataset
-from ohw.utils import save_image, save_label, convert_pred, get_model_from_xlsx, log_memory_usage, load_image
+from ohw.utils import save_image, save_label, convert_pred, get_model_from_xlsx, log_memory_usage, load_image, annotate_image_w_buffer
 from ohw.log_utils import log_exists, read_log, append_to_log, summary_exists, append_to_summary, create_summary, postprocess_summary
 
 # https://docs.ultralytics.com/guides/sahi-tiled-inference/#batch-prediction
@@ -32,9 +31,12 @@ def parse_args():
     
     parser.add_argument("--ratio", default=0.3, type=float, help="Overlap ratio, vertical as well as horizontal. Default 0.3")
     parser.add_argument("--size", default=1280, type=int, help="Model size to be used for inference. Defaults to 1280.")
+    parser.add_argument("--pixel", default=50, type=int, help="Minimum bounding box pixels per dimenions around object. Defaults to 50")
+    parser.add_argument("--lw", default=5, type=int, help="Line width for bounding boxes in pixels. Defaults to 5")
     return parser.parse_args()
 
-def sahi(input_dir : str, registry_f : str, resolution : str, output : str, name : str, summary : bool, visualise : bool, metric : str, overlap : float = 0.3, model_size : int = 1280, debug : bool = False):
+def sahi(input_dir : str, registry_f : str, resolution : str, output : str, name : str, summary : bool, visualise : bool, metric : str, overlap : float = 0.3, model_size : int = 1280, debug : bool = False,
+        pixel : int = 50, lw : int =5):
     # Model
     model_name, conf_thresh = get_model_from_xlsx(registry_f, resolution, metric)
     model_p = os.path.join(os.path.dirname(registry_f) , model_name, 'weights', 'best.pt')
@@ -130,7 +132,8 @@ def sahi(input_dir : str, registry_f : str, resolution : str, output : str, name
             save_label(labels, labelf)
             # if visualisations are asked for, output them too
             # if visualise:
-            img_w_bboxes = annotate_image(img, labels, line_width=2, font_size=6)
+            img_w_bboxes = annotate_image_w_buffer(img, labels, line_width=lw, minval=pixel)
+            # img_w_bboxes = annotate_image(img, labels, line_width=2, font_size=6)
             visf = outdir_v / (img_n + ".jpg") 
             save_image(img_w_bboxes, str(visf), cvtcolor=True)
             
@@ -149,4 +152,4 @@ def sahi(input_dir : str, registry_f : str, resolution : str, output : str, name
 if __name__=="__main__":
     # test_gpu()
     args = parse_args()
-    sahi(args.input, args.registry, args.resolution, args.output, args.name, args.summary, args.visualise, args.metric, args.ratio, args.size, args.debug)
+    sahi(args.input, args.registry, args.resolution, args.output, args.name, args.summary, args.visualise, args.metric, args.ratio, args.size, args.debug, args.pixel, args.lw)

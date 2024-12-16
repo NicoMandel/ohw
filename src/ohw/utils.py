@@ -293,24 +293,9 @@ def annotate_image_w_buffer(img : np.ndarray, detections : np.ndarray, rgb : tup
             cv2.rectangle(self.im, p1, p2, color, thickness=self.lw, lineType=cv2.LINE_AA)
         """
         det_xyxy = det_to_bb(img.shape, detections).astype(np.int32)
-        img_out = img.copy()
         line_width = 5 if line_width is None else line_width
         for row in det_xyxy:
             c_idx, *box = row
             tl, br = _check_bbox_dim(box, img.shape, minval)
-            cv2.rectangle(img_out, tl, br, rgb , line_width)
-        return img_out
-        # ann = Annotator(
-        #     img,
-        #     line_width=line_width,  # default auto-size
-        #     font_size=font_size,  # default auto-size
-        #     font="Arial.ttf",  # must be ImageFont compatible
-        #     pil=False,  # use PIL, otherwise uses OpenCV
-        # )
-        # bboxes = det_to_bb(img.shape, detections)
-        # for box in bboxes:
-        #     c_idx, *box = box
-        #     label = "OHW"
-        #     ann.box_label(box, label, colors(c_idx, bgr=False))
-        # img_w_bboxes = ann.result()
-        # return img_w_bboxes
+            cv2.rectangle(img, tl, br, rgb , line_width)
+        return img
