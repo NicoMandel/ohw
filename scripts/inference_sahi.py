@@ -31,8 +31,8 @@ def parse_args():
     
     parser.add_argument("--ratio", default=0.3, type=float, help="Overlap ratio, vertical as well as horizontal. Default 0.3")
     parser.add_argument("--size", default=1280, type=int, help="Model size to be used for inference. Defaults to 1280.")
-    parser.add_argument("--pixel", default=50, type=int, help="Minimum bounding box pixels per dimenions around object. Defaults to 50")
-    parser.add_argument("--lw", default=5, type=int, help="Line width for bounding boxes in pixels. Defaults to 5")
+    parser.add_argument("--pixel", default=80, type=int, help="Minimum bounding box pixels per dimenions around object. Defaults to 50")
+    parser.add_argument("--lw", default=15, type=int, help="Line width for bounding boxes in pixels. Defaults to 5")
     return parser.parse_args()
 
 def sahi(input_dir : str, registry_f : str, resolution : str, output : str, name : str, summary : bool, visualise : bool, metric : str, overlap : float = 0.3, model_size : int = 1280, debug : bool = False,
