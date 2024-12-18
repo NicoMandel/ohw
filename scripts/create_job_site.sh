@@ -125,7 +125,8 @@ for jobsite in "${flightdirs[@]}"; do
     # Template and temporary file
 
     # Replace placeholders in the template
-    sed -e "s/{{jid1}}/$jid1/" \
+    sed -e "s/{{jid0}}/$jid0/" \
+        -e "s/{{jid1}}/$jid1/" \
         -e "s/{{jid2}}/$jid2/" \
         -e "s/{{jid3}}/$jid3/" \
         "$TEMPLATE" > "$controller_script"

@@ -4,17 +4,18 @@
 #SBATCH -c 1 
 #SBATCH --mem 500M 
 #SBATCH --time=0-07:00
-#SBATCH --job-name=ctrl-{{jid1}}
-#SBATCH --err=/mnt/scratch_lustre/hawkweed_drone_scratch/log/ctrl-%j.err
+#SBATCH --job-name=ctrl_{{jid0}}
+#SBATCH --err=/mnt/scratch_lustre/hawkweed_drone_scratch/log/ctrl_%j.err
 #SBATCH --output=/mnt/scratch_lustre/hawkweed_drone_scratch/log/ctrl_%j.out
 
 
 # Job dependencies
+jid1={{jid0}}
 jid1={{jid1}}
 jid2={{jid2}}
 jid3={{jid3}}
 
-echo "Monitoring Job IDs: $jid1, $jid2, $jid3"
+echo "Monitoring Job IDs: $jid0, $jid1, $jid2, $jid3"
 
 # Function to get job status
 get_job_status() {
@@ -45,7 +46,7 @@ process_jobs() {
             echo "Job $current_job failed or was cancelled. Proceeding to next job..."
             break
         fi
-        sleep 30
+        sleep 60
     done
 
     if [[ ${#remaining_jobs[@]} -gt 0 ]]; then
@@ -56,6 +57,6 @@ process_jobs() {
 }
 
 # Start processing jobs
-process_jobs "$jid1" "$jid2" "$jid3"
+process_jobs "$jid0" "$jid1" "$jid2" "$jid3"
 
 echo "Controller script finished."
