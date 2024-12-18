@@ -5,6 +5,8 @@ code_repo="/home/mandeln/ohw"
 base_shared_dir="/mnt/scratch_lustre/hawkweed_drone_scratch"
 resolution="024cm" # alternative -> "1cm"
 model_registry="results/model_res.xlsx"
+# controller Template
+TEMPLATE="$code_repo/scripts/controller_job_template.sh"
 
 usage() {
     printf "\nUsage : $0 -d <directory>
@@ -90,15 +92,14 @@ for jobsite in "${flightdirs[@]}"; do
         echo "#SBATCH --mem 32G" 
         echo "#SBATCH --partition=GPU" 
         echo "#SBATCH --gpus-per-node=1" 
-        echo "#SBATCH --mem 32G" 
         echo "#SBATCH -t 0-01:59"            
         echo "#SBATCH --job-name=\"$jn\"" 
         echo "#SBATCH --err=$base_shared_dir/log_nico/inference/job-%j.err" 
         echo "#SBATCH --output=$base_shared_dir/log_nico/inference/job-%j.out" 
 
         # module parts
-        echo "module purge" 
-        echo "module load go singularity"        
+        # echo "module purge" 
+        # echo "module load go singularity"        
 
         # actual job - ensure that the directories are correct - input and output!
         echo "singularity exec --nv --pwd /home/ubuntu --bind $code_repo/scripts:/home/ubuntu/ \
@@ -118,6 +119,21 @@ for jobsite in "${flightdirs[@]}"; do
     jid1=$(sbatch --dependency=afternotok:$jid0 "$jn.sh" | awk '{print $NF}')
     jid2=$(sbatch --dependency=afternotok:$jid1 "$jn.sh" | awk '{print $NF}')
     jid3=$(sbatch --dependency=afternotok:$jid2 "$jn.sh")
+
+    # running the controller script
+    controller_script="controller_$jn.sh"
+    # Template and temporary file
+
+    # Replace placeholders in the template
+    sed -e "s/{{jid1}}/$jid1/" \
+        -e "s/{{jid2}}/$jid2/" \
+        -e "s/{{jid3}}/$jid3/" \
+        "$TEMPLATE" > "$controller_script"
+
+    # Submit the controller job
+    sbatch "$controller_script"
+    # Clean up temporary file
+    rm  "$controller_script"        
 
     # cat "$jn".sh
     rm "$jn".sh
