@@ -1,12 +1,10 @@
 #!/bin/bash
 
 # code and data reposiories
-code_repo="/home/mandeln/ohw"
+code_repo="/mnt/appsource/local/hawkweed_drone/ohw"
 base_shared_dir="/mnt/scratch_lustre/hawkweed_drone_scratch"
 resolution="024cm" # alternative -> "1cm"
 model_registry="results/model_res.xlsx"
-# controller Template
-TEMPLATE="$code_repo/scripts/controller_job_template.sh"
 
 usage() {
     printf "\nUsage : $0 -d <directory>
@@ -21,7 +19,6 @@ usage() {
                 alternatives: , 2023.12.22_Mufflers_Gap, 202.12.23_Long_Plain_Rd_Snowy_Mtns_Hwy_jxn, 2023.12.21_Billmans_Point/
         -r resolution which to process. Must be one of <024cm> or <1cm>. So that the appropriate model can be chosen. Defaults to 024cm
         -m path to model registry file, specifying models that can be chosen. Defaults to '$base_shared_dir/$model_registry' 
-        -p polling interval - set in seconds! To check if folder is still being written to by an upload. Defaults to 5 minutes
         -h display this help message
         
         Example:
@@ -32,15 +29,13 @@ usage() {
 # default values
 resolution="024cm"
 site_location=""
-polling_interval=300
 
 # argument parsing
-while getopts 's:r:m:p:h' flag; do 
+while getopts 's:r:m:h' flag; do 
     case "${flag}" in
         s) site_location="${OPTARG}" ;;
         r) resolution="${OPTARG}" ;;
         m) model_registry="${OPTARG}" ;;
-        p) polling_interval="${OPTARG}" ;;
         h) usage 
             exit -1;;
         *) usage
@@ -54,19 +49,6 @@ if [ -z "$site_location" ]; then
     usage
     exit -1
 fi
-
-# Polling interval - check if upload of folder is complete
-# ! does not work - due to restrictions on lsof for non-superusers
-#  echo "Polling $site_location for upload completion..."
-# while true; do
-#     if lsof +D "$site_location" > /dev/null; then
-#         echo "Uploads still in progress..."
-#     else
-#         echo "Upload completed. Proceeding to submit SLURM job"
-#         break
-#     fi
-#     sleep "$polling_interval"
-# done
 
 echo "Site Location: $site_location"
 echo "Resolution: $resolution"
@@ -94,19 +76,15 @@ for jobsite in "${flightdirs[@]}"; do
         echo "#SBATCH --gpus-per-node=1" 
         echo "#SBATCH -t 0-01:59"            
         echo "#SBATCH --job-name=\"$jn\"" 
-        echo "#SBATCH --err=$base_shared_dir/log_nico/inference/job-%j.err" 
-        echo "#SBATCH --output=$base_shared_dir/log_nico/inference/job-%j.out" 
-
-        # module parts
-        # echo "module purge" 
-        # echo "module load go singularity"        
+        echo "#SBATCH --err=$base_shared_dir/log/inference/job-%j.err" 
+        echo "#SBATCH --output=$base_shared_dir/log/inference/job-%j.out" 
 
         # actual job - ensure that the directories are correct - input and output!
         echo "singularity exec --nv --pwd /home/ubuntu --bind $code_repo/scripts:/home/ubuntu/ \
                 --bind $code_repo/src/ohw:/home/ubuntu/ohw \
                 --bind \"$jobsite\":/home/ubuntu/inference \
-                --bind $base_shared_dir/inference_out:/home/ubuntu/inference_out \
-                --bind $base_shared_dir/results_nico:/home/ubuntu/results \
+                --bind $base_shared_dir/inference_out_temp:/home/ubuntu/inference_out \
+                --bind $base_shared_dir/results:/home/ubuntu/results \
                 $base_shared_dir/pt-sahi-123.simg python3 -u inference_sahi.py \
                 inference $model_registry $resolution inference_out -n \"$sitename/$jobname\" -s -v" 
     } > "$jn.sh"
@@ -118,23 +96,7 @@ for jobsite in "${flightdirs[@]}"; do
     echo "$jid0"
     jid1=$(sbatch --dependency=afternotok:$jid0 "$jn.sh" | awk '{print $NF}')
     jid2=$(sbatch --dependency=afternotok:$jid1 "$jn.sh" | awk '{print $NF}')
-    jid3=$(sbatch --dependency=afternotok:$jid2 "$jn.sh")
-
-    # running the controller script
-    controller_script="controller_$jn.sh"
-    # Template and temporary file
-
-    # Replace placeholders in the template
-    sed -e "s/{{jid0}}/$jid0/" \
-        -e "s/{{jid1}}/$jid1/" \
-        -e "s/{{jid2}}/$jid2/" \
-        -e "s/{{jid3}}/$jid3/" \
-        "$TEMPLATE" > "$controller_script"
-
-    # Submit the controller job
-    sbatch "$controller_script"
-    # Clean up temporary file
-    rm  "$controller_script"        
+    jid3=$(sbatch --dependency=afternotok:$jid2 "$jn.sh") 
 
     # cat "$jn".sh
     rm "$jn".sh
