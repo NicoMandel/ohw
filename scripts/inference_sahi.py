@@ -51,7 +51,7 @@ def sahi(input_dir : str, registry_f : str, resolution : str, output : str, name
     # Dataset
     site_dir = os.path.abspath(input_dir)
     ds_name = name if name else os.path.basename(os.path.normpath(site_dir))
-    outdir_p = os.path.abspath(os.path.join(output, model_name, ds_name))
+    outdir_p = os.path.abspath(output)
     outdir_l = Path(os.path.join(outdir_p, "labels"))
     outdir_l.mkdir(exist_ok=True, parents=True)
     print("Created: {}\nWill write labels to it".format(outdir_l))
@@ -70,10 +70,10 @@ def sahi(input_dir : str, registry_f : str, resolution : str, output : str, name
     ds = DisplayDataset(input_dir, img_dir=None)
     
     # if summary file doesn't exist write first line - which model processes how many images
-    if not summary_exists(outdir_p, model_name): create_summary(outdir_p, model_name, len(ds))
+    if not summary_exists(outdir_p, model_name): create_summary(outdir_p, model_name, ds_name, len(ds))
 
     i = 0
-    print("Performing inference on a total of {} images. Checking if already processed first".format(len(ds)))
+    print("Performing inference on a total of {} images with model: {}. Checking if already processed first".format(len(ds), model_name))
     st_time = None
     for ds_item in tqdm(ds):
         # debugging image loading times
@@ -145,6 +145,7 @@ def sahi(input_dir : str, registry_f : str, resolution : str, output : str, name
             print("Iteration {} Posprocessing time: {}".format(i, end_time - st_time))
         append_to_log(outdir_p, img_n)
         st_time = time.time()
+    print("Done with processing {}. Finished all images!".format(input_dir))
     if summary:
         postprocess_summary(outdir_p, model_name, len(ds))
     

@@ -9,7 +9,7 @@ model_registry="results/model_res.xlsx"
 usage() {
     printf "\nUsage : $0 -d <directory>
     Options:
-        -d directory which to process. Must contain child directories containing <flight> (case insensitive),
+        -s directory which to process. Must contain child directories containing <flight> (case insensitive),
             which have to contain the images directly. Cannot contain child directories, such as <images> or others.
             The <flight> diretories will be processed, one job submitted for each and outputs written to:
             <$base_shared_dir/results_nico>
@@ -58,12 +58,21 @@ echo "Model registry file: $model_registry"
 sitename=$(basename "$site_location")
 mapfile -t flightdirs < <(find "$site_location" -maxdepth 1 -type d -iname "*flight*")
 
+# inside the site location, create a directory
+mkdir -p "$site_location/detections"
+echo "created $site_location/detections"
+
 module load slurm
 # echo all the relevant factors into the base file by structure
 for jobsite in "${flightdirs[@]}"; do
     # create job name
     jobname=$(basename "$jobsite")
     jn="$sitename-$jobname"
+
+    # create output directory for the job as subdir of "detections"
+    j_output="$site_location/detections/$jobname"
+    mkdir -p $j_output
+    echo "created $j_output"
 
     # automatically fill in sbatch file
     {
@@ -74,7 +83,7 @@ for jobsite in "${flightdirs[@]}"; do
         echo "#SBATCH --mem 32G" 
         echo "#SBATCH --partition=GPU" 
         echo "#SBATCH --gpus-per-node=1" 
-        echo "#SBATCH -t 0-01:59"            
+        echo "#SBATCH -t 0-02:59"            
         echo "#SBATCH --job-name=\"$jn\"" 
         echo "#SBATCH --err=$base_shared_dir/log/inference/job-%j.err" 
         echo "#SBATCH --output=$base_shared_dir/log/inference/job-%j.out" 
@@ -83,7 +92,7 @@ for jobsite in "${flightdirs[@]}"; do
         echo "singularity exec --nv --pwd /home/ubuntu --bind $code_repo/scripts:/home/ubuntu/ \
                 --bind $code_repo/src/ohw:/home/ubuntu/ohw \
                 --bind \"$jobsite\":/home/ubuntu/inference \
-                --bind $base_shared_dir/inference_out_temp:/home/ubuntu/inference_out \
+                --bind $j_output:/home/ubuntu/inference_out \
                 --bind $base_shared_dir/results:/home/ubuntu/results \
                 $base_shared_dir/pt-sahi-123.simg python3 -u inference_sahi.py \
                 inference $model_registry $resolution inference_out -n \"$sitename/$jobname\" -s -v" 
