@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # code and data reposiories
-code_repo="/home/mandeln/ohw"
+code_repo="/mnt/appsource/local/hawkweed_drone/ohw"
 base_shared_dir="/mnt/scratch_lustre/hawkweed_drone_scratch"
 
 # training both datasets
@@ -28,8 +28,8 @@ for ms in "${model_size[@]}"; do
         echo "#SBATCH --mem 32G" >> "$jn".sh
         echo "#SBATCH -t 0-10:59" >> "$jn".sh
         echo "#SBATCH --job-name=\"$jn\"" >> "$jn".sh
-        echo "#SBATCH --err=$base_shared_dir/log_nico/training/job-%j.err" >> "$jn".sh
-        echo "#SBATCH --output=$base_shared_dir/log_nico/training/job-%j.out" >> "$jn".sh
+        echo "#SBATCH --err=$base_shared_dir/log/training/job-%j.err" >> "$jn".sh
+        echo "#SBATCH --output=$base_shared_dir/log/training/job-%j.out" >> "$jn".sh
 
         # module parts
         echo "module purge" >> "$jn".sh
@@ -42,9 +42,9 @@ for ms in "${model_size[@]}"; do
         # actual job - ensure that the directories are correct - input and output!
         echo "singularity exec --nv --pwd /home/ubuntu \
             --bind $code_repo/scripts:/home/ubuntu/ \
-            --bind $base_shared_dir/data_nico:/home/ubuntu/datasets \
+            --bind $base_shared_dir/data:/home/ubuntu/datasets \
             --bind $code_repo/src/ohw:/home/ubuntu/ohw \
-            --bind $base_shared_dir/results_nico:/home/ubuntu/results \
+            --bind $base_shared_dir/results_2025:/home/ubuntu/results \
             $base_shared_dir/pt-ul-8281.simg python3 -u train_model.py \
             $ms datasets/$ds/$ds.yaml --save results/model_res.xlsx" >> "$jn".sh
 
