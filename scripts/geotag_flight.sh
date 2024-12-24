@@ -84,6 +84,6 @@ jn="Geotag-$csv_name"
             geotags csv/$csv_name $kml_flag $north_flag" 
 } > "$jn.sh"
 
-# sbatch "$jn".sh
-cat "$jn".sh
+sbatch "$jn".sh
+# cat "$jn".sh
 rm "$jn".sh
