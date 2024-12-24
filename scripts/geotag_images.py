@@ -18,7 +18,7 @@ def parse_args():
 
 def geotag_images(input_dir : str, geotag_csv : str = None, kml : bool = False, compress : bool = True, north_arrow : bool = False):
     site_dir = os.path.abspath(input_dir)
-    gps_ds = GPSDataset(root=site_dir, csv_file=geotag_csv, img_dir="visualisations")
+    gps_ds = GPSDataset(root=site_dir, csv_file=geotag_csv, img_dir=None)
 
     for imgf, geodata, img_id in tqdm(gps_ds, leave=True):
         geotag_image(imgf, geodata)

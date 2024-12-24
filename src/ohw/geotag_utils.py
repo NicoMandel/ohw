@@ -65,7 +65,7 @@ def create_kml(img_f : str, geodata : pd.Series, save_dir: str, img_id : str, co
         os.remove(img_f)
         # pass
 
-def draw_north_arrow(imgf : str, geodata : pd.Series, save_dir: str, img_id : str, color : tuple = (0, 0, 0), lw : int = 20) -> None:
+def draw_north_arrow(imgf : str, geodata : pd.Series, save_dir: str, img_id : str, color : tuple = (0, 0, 255), lw : int = 20) -> None:
     """
         Method to draw a north arrow on the images
     """
@@ -74,13 +74,12 @@ def draw_north_arrow(imgf : str, geodata : pd.Series, save_dir: str, img_id : st
     h, w = img.shape[:2]
 
     arr_len = min(h,w) // 8     # 1/8th length
-    # TODO adopt this placement calculation
     center_x, center_y = w - (100 + arr_len), (100 + arr_len)       # top right corner
 
     # arrow tip based on yaw
     ang_rad = np.deg2rad(yaw)
     end_x = int(center_x + arr_len * np.sin(ang_rad))
-    end_y = int(center_y + arr_len * np.cos(ang_rad))
+    end_y = int(center_y - arr_len * np.cos(ang_rad))
     cv2.arrowedLine(img, (center_x, center_y), (end_x, end_y), color, lw, tipLength=0.3)
     imgp = os.path.join(save_dir, img_id + "_N.jpg")
     save_image(img, imgp)
