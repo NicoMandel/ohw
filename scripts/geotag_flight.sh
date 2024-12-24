@@ -78,7 +78,7 @@ jn="Geotag-$csv_name"
     # actual job - ensure that the directories are correct - input and output!
     echo "singularity exec --nv --pwd /home/ubuntu --bind $code_repo/scripts:/home/ubuntu/ \
             --bind $code_repo/src/ohw:/home/ubuntu/ohw \
-            --bind $(realpath \"$site_location\"):/home/ubuntu/geotags \
+            --bind \"$site_location\":/home/ubuntu/geotags \
             --bind $csv_base:/home/ubuntu/csv \
 
             $base_shared_dir/pt-sahi-123.simg python3 -u geotag_images.py \
