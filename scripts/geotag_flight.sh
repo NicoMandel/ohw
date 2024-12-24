@@ -79,11 +79,11 @@ jn="Geotag-$csv_name"
     echo "singularity exec --nv --pwd /home/ubuntu --bind $code_repo/scripts:/home/ubuntu/ \
             --bind $code_repo/src/ohw:/home/ubuntu/ohw \
             --bind \"$site_location\":/home/ubuntu/geotags \
-            --bind $csv_base:/home/ubuntu/csv \
+            --bind \"$csv_base\":/home/ubuntu/csv \
             $base_shared_dir/pt-sahi-123.simg python3 -u geotag_images.py \
-            geotags csv/$csv_file $kml_flag $north_flag" 
+            geotags csv/$csv_name $kml_flag $north_flag" 
 } > "$jn.sh"
 
-sbatch "$jn".sh
-# cat "$jn".sh
+# sbatch "$jn".sh
+cat "$jn".sh
 rm "$jn".sh
