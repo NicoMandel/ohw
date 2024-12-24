@@ -61,8 +61,7 @@ csv_name=$(basename "$csv_file")
 
 module load slurm
 # echo all the relevant factors into the base file by structure
-loc=$(dirname "$site_location")
-jn="GT-$loc"
+jn="Geotag-$csv_name"
 
 # automatically fill in sbatch file
 {
