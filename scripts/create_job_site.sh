@@ -5,6 +5,8 @@ code_repo="/mnt/appsource/local/hawkweed_drone/ohw"
 base_shared_dir="/mnt/scratch_lustre/hawkweed_drone_scratch"
 resolution="024cm" # alternative -> "1cm"
 model_registry="results/model_res.xlsx"
+ratio=0.3
+site_location=""
 
 usage() {
     printf "\nUsage : $0 -d <directory>
@@ -19,6 +21,7 @@ usage() {
                 alternatives: , 2023.12.22_Mufflers_Gap, 202.12.23_Long_Plain_Rd_Snowy_Mtns_Hwy_jxn, 2023.12.21_Billmans_Point/
         -r resolution which to process. Must be one of <024cm> or <1cm>. So that the appropriate model can be chosen. Defaults to 024cm
         -m path to model registry file, specifying models that can be chosen. Defaults to '$base_shared_dir/$model_registry' 
+        -o overlap ratio to be used. When processing two adjacent images, percentage that overlaps. Default is $ratio
         -h display this help message
         
         Example:
@@ -26,16 +29,13 @@ usage() {
 "
 }
 
-# default values
-resolution="024cm"
-site_location=""
-
 # argument parsing
-while getopts 's:r:m:h' flag; do 
+while getopts 's:r:m:o:h' flag; do 
     case "${flag}" in
         s) site_location="${OPTARG}" ;;
         r) resolution="${OPTARG}" ;;
         m) model_registry="${OPTARG}" ;;
+        o) ratio="${OPTARG}" ;;
         h) usage 
             exit -1;;
         *) usage
@@ -53,6 +53,7 @@ fi
 echo "Site Location: $site_location"
 echo "Resolution: $resolution"
 echo "Model registry file: $model_registry"
+echo "Overlap ratio: $ratio"
 
 # automated job naming and finding subdirectories
 sitename=$(basename "$site_location")
@@ -95,7 +96,7 @@ for jobsite in "${flightdirs[@]}"; do
                 --bind $j_output:/home/ubuntu/inference_out \
                 --bind $base_shared_dir/results:/home/ubuntu/results \
                 $base_shared_dir/pt-sahi-123.simg python3 -u inference_sahi.py \
-                inference $model_registry $resolution inference_out -n \"$sitename/$jobname\" -s -v" 
+                inference $model_registry $resolution inference_out -n \"$sitename/$jobname\" --ratio $ratio -s -v" 
     } > "$jn.sh"
 
     # choose between sbatch "$jn.sh" or cat "$jn.sh"
