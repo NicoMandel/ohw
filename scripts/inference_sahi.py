@@ -78,7 +78,7 @@ def sahi(input_dir : str, registry_f : str, resolution : str, output : str, name
     if not summary_exists(outdir_p, model_name): create_summary(outdir_p, model_name, conf_thresh, ds_name, len(ds))
 
     i = 0
-    print("Performing inference on a total of {} images with model: {} and confidence: {}. Checking if already processed first".format(len(ds), model_name, conf_thresh))
+    print("Performing inference on a total of {} images with model: {}, confidence: {} and overlap : {}. Checking if already processed first".format(len(ds), model_name, conf_thresh, overlap))
     st_time = None
     for ds_item in tqdm(ds):
         # debugging image loading times
