@@ -169,7 +169,16 @@ def append_to_xlsx(key, results_dict : dict, xlsx_f : str) -> bool:
     except OSError as ose:
         print(ose)
         return False
-    
+
+def get_model(path : str, resolution : str, confidence : float, metric : str = 'fitness') -> tuple:
+    if path.endswith(".xlsx"):
+        print("Loading best model for resolution {} from registry file at: {}".format(resolution, path))
+        return get_model_from_xlsx(path, resolution, metric)
+    else:
+        model_name = os.path.basename(os.path.normpath(path))
+        print("Using model {} with pre-specified confidence {}. No check on resolution here!".format(model_name, confidence))
+        return model_name, confidence
+
 def get_model_from_xlsx(xlsx_path : str, resolution : str, metric : str = 'fitness') -> tuple:
     """
         function to get confidence and best model nam for a specific resolution from a path.

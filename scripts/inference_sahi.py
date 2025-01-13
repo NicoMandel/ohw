@@ -10,14 +10,14 @@ from sahi import AutoDetectionModel
 from sahi.predict import get_sliced_prediction
 
 from ohw.dataset import DisplayDataset
-from ohw.utils import save_image, save_label, convert_pred, get_model_from_xlsx, log_memory_usage, load_image, annotate_image_w_buffer
+from ohw.utils import save_image, save_label, convert_pred, get_model, log_memory_usage, load_image, annotate_image_w_buffer
 from ohw.log_utils import log_exists, read_log, append_to_log, summary_exists, append_to_summary, create_summary, postprocess_summary
 
 # https://docs.ultralytics.com/guides/sahi-tiled-inference/#batch-prediction
 def parse_args():
     parser = ArgumentParser(description="Script for displaying the images for a site with associated labels.")
     parser.add_argument("input", type=str, help="Location of the input folder, as root. Will find <images> and <labels> subfolders.")
-    parser.add_argument("registry", type=str, help="Path of registry xlsx. Will choose best model for given resolution from this, with the metric specified.")
+    parser.add_argument("registry", type=str, help="Path of registry xlsx. Will choose best model for given resolution from this, with the metric specified. Also possible to specify a run. From the run directory, will load weights/best.pt, then confidence needs to be defined as well!")
     parser.add_argument("resolution", type=str, help="Resolution which model should be loaded. Choose from 024cm and 1cm.")
     parser.add_argument("output", type=str, help="Output location for the label files. Will create <model_name>/<labels> subfolders here.")
     
@@ -25,6 +25,7 @@ def parse_args():
     parser.add_argument("-s", "--summary", action="store_true", help="If given, will create summary statistics - file with count of instances per image and list of images with detections.")
     parser.add_argument("-v", "--visualise", action="store_true", help="If true, will also write <model_name>/dataset/<visualisations> folder.")
     parser.add_argument("-m", "--metric", type=str, default="fitness", help="Metric that is used to select the maximum model from the registry. Defaults to fitness")
+    parser.add_argument("-c", "--confidence", type=float, required=False, help="Confidence threshold (required for direct models).")
 
     # debug statement
     parser.add_argument("--debug", action="store_true", help="If given, will log cuda memory.")
@@ -38,7 +39,7 @@ def parse_args():
 def sahi(input_dir : str, registry_f : str, resolution : str, output : str, name : str, summary : bool, visualise : bool, metric : str, overlap : float = 0.3, model_size : int = 1280, debug : bool = False,
         pixel : int = 50, lw : int =5):
     # Model
-    model_name, conf_thresh = get_model_from_xlsx(registry_f, resolution, metric)
+    model_name, conf_thresh = get_model(registry_f, resolution, conf_thresh, metric)
     model_p = os.path.join(os.path.dirname(registry_f) , model_name, 'weights', 'best.pt')
     
     detection_model = AutoDetectionModel.from_pretrained(
@@ -70,10 +71,10 @@ def sahi(input_dir : str, registry_f : str, resolution : str, output : str, name
     ds = DisplayDataset(input_dir, img_dir=None)
     
     # if summary file doesn't exist write first line - which model processes how many images
-    if not summary_exists(outdir_p, model_name): create_summary(outdir_p, model_name, ds_name, len(ds))
+    if not summary_exists(outdir_p, model_name): create_summary(outdir_p, model_name, conf_thresh, ds_name, len(ds))
 
     i = 0
-    print("Performing inference on a total of {} images with model: {}. Checking if already processed first".format(len(ds), model_name))
+    print("Performing inference on a total of {} images with model: {} and confidence: {}. Checking if already processed first".format(len(ds), model_name, conf_thresh))
     st_time = None
     for ds_item in tqdm(ds):
         # debugging image loading times

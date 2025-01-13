@@ -7,6 +7,7 @@ resolution="024cm" # alternative -> "1cm"
 model_registry="results/model_res.xlsx"
 ratio=0.3
 site_location=""
+confidence=false
 
 usage() {
     printf "\nUsage : $0 -d <directory>
@@ -20,8 +21,9 @@ usage() {
                 /mnt/load/aerial/drone_uav/2023-24/Ag_Drones_1/2023.12.19_Tantangara_North_East/WingtraPilotProjects/ 
                 alternatives: , 2023.12.22_Mufflers_Gap, 202.12.23_Long_Plain_Rd_Snowy_Mtns_Hwy_jxn, 2023.12.21_Billmans_Point/
         -r resolution which to process. Must be one of <024cm> or <1cm>. So that the appropriate model can be chosen. Defaults to 024cm
-        -m path to model registry file, specifying models that can be chosen. Defaults to '$base_shared_dir/$model_registry' 
+        -m path to model registry file, specifying models that can be chosen. Defaults to '$base_shared_dir/$model_registry'. Can also specify a run directory. If it doesn't end in .xlsx,will load the model from weights/best.pt inside that folder.
         -o overlap ratio to be used. When processing two adjacent images, percentage that overlaps. Default is $ratio
+        -c confidence to use. optional for registry, required for direct model files instead of registries.
         -h display this help message
         
         Example:
@@ -30,11 +32,12 @@ usage() {
 }
 
 # argument parsing
-while getopts 's:r:m:o:h' flag; do 
+while getopts 's:r:m:c:o:h' flag; do 
     case "${flag}" in
         s) site_location="${OPTARG}" ;;
         r) resolution="${OPTARG}" ;;
         m) model_registry="${OPTARG}" ;;
+        c) confidence="${OPTARG}" ;;
         o) ratio="${OPTARG}" ;;
         h) usage 
             exit -1;;
@@ -48,6 +51,19 @@ if [ -z "$site_location" ]; then
     echo "ERROR: Site location is required!".
     usage
     exit -1
+fi
+
+if [[ "$model_registry" != *.xlsx && -z "$confidence" ]]; then
+    echo "ERROR: Confidence is required when specifying a model directly" 
+    usage
+    exit -1
+fi
+
+# set confidence string if given
+if [[ -n "$confidence" ]]; then
+    confidence_string="-c $confidence"
+else
+    confidence_string=""
 fi
 
 echo "Site Location: $site_location"
@@ -96,7 +112,7 @@ for jobsite in "${flightdirs[@]}"; do
                 --bind $j_output:/home/ubuntu/inference_out \
                 --bind $base_shared_dir/results:/home/ubuntu/results \
                 $base_shared_dir/pt-sahi-123.simg python3 -u inference_sahi.py \
-                inference $model_registry $resolution inference_out -n \"$sitename/$jobname\" --ratio $ratio -s -v" 
+                inference $model_registry $resolution inference_out -n \"$sitename/$jobname\" $confidence_string --ratio $ratio -s -v" 
     } > "$jn.sh"
 
     # choose between sbatch "$jn.sh" or cat "$jn.sh"

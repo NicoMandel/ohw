@@ -54,10 +54,10 @@ def append_to_summary(dirp : str, model_n : str, img_id : str, detections : int)
         f.write("{}, {}\n".format(img_id, detections))
     return None
 
-def create_summary(dirp : str, model_n : str, ds_name : str, img_ct : int) -> None:
+def create_summary(dirp : str, model_n : str, confidence : float, ds_name : str, img_ct : int) -> None:
     spath = _summarypath(dirp, model_n)
     with open(spath, "w") as f:
-        f.write("Processing {} images on dataset with name {} with model {}\n".format(img_ct, ds_name, model_n))
+        f.write("Processing {} images on dataset with name {} with model {} and confidence {}\n".format(img_ct, ds_name, model_n, confidence))
     return None
 
 def prepend_summary(dirp : str, model_n : str, ds_len : int, det_count : int):
