@@ -36,12 +36,16 @@ def parse_args():
     parser.add_argument("--lw", default=15, type=int, help="Line width for bounding boxes in pixels. Defaults to 5")
     return parser.parse_args()
 
-def sahi(input_dir : str, registry_f : str, resolution : str, output : str, name : str, summary : bool, visualise : bool, metric : str, overlap : float = 0.3, model_size : int = 1280, debug : bool = False,
+def sahi(input_dir : str, registry_f : str, resolution : str, output : str, name : str, summary : bool, visualise : bool, metric : str, confidence : float = None, overlap : float = 0.3, model_size : int = 1280, debug : bool = False,
         pixel : int = 50, lw : int =5):
     # Model
-    model_name, conf_thresh = get_model(registry_f, resolution, conf_thresh, metric)
+    model_name, conf_thresh = get_model(registry_f, resolution, confidence, metric)
     model_p = os.path.join(os.path.dirname(registry_f) , model_name, 'weights', 'best.pt')
-    
+        
+    # overwrite confidence, if the arg is given 
+    if confidence is not None:
+        conf_thresh = confidence
+
     detection_model = AutoDetectionModel.from_pretrained(
         model_type="yolov8",
         model_path=model_p,
@@ -154,4 +158,4 @@ def sahi(input_dir : str, registry_f : str, resolution : str, output : str, name
 if __name__=="__main__":
     # test_gpu()
     args = parse_args()
-    sahi(args.input, args.registry, args.resolution, args.output, args.name, args.summary, args.visualise, args.metric, args.ratio, args.size, args.debug, args.pixel, args.lw)
+    sahi(args.input, args.registry, args.resolution, args.output, args.name, args.summary, args.visualise, args.metric, args.confidence, args.ratio, args.size, args.debug, args.pixel, args.lw)
