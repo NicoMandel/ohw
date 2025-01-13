@@ -7,7 +7,7 @@ resolution="024cm" # alternative -> "1cm"
 model_registry="results/model_res.xlsx"
 ratio=0.3
 site_location=""
-confidence=false
+confidence=""
 
 usage() {
     printf "\nUsage : $0 -d <directory>
@@ -68,7 +68,8 @@ fi
 
 echo "Site Location: $site_location"
 echo "Resolution: $resolution"
-echo "Model registry file: $model_registry"
+echo "Model or model registry file: $model_registry"
+echo "Confidence $confidence"
 echo "Overlap ratio: $ratio"
 
 # automated job naming and finding subdirectories
