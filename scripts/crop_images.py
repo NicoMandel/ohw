@@ -51,16 +51,27 @@ def get_start_location(xyxy_bbox : np.ndarray, crop_size : int, img_shape) -> np
         Function to generate a starting point for a crop from a bounding box. Generates 2 ints between the starting location of the bbox 
         and the end location of the bbox - 1280
     """
-    try:
-        img_h, img_w = img_shape
+    img_h, img_w = img_shape
 
-        w_s = np.random.randint(max(0, xyxy_bbox[2] - crop_size), min(xyxy_bbox[0], img_w - crop_size))
-        h_s = np.random.randint(max(0, xyxy_bbox[3] - crop_size), min(xyxy_bbox[1], img_h - crop_size))
-    except ValueError:
-        print("Numpy ValueError. img w x h {} x {}".format(img_w, img_h))
-        print("Width low val {} high val {}".format(max(0, xyxy_bbox[2] - crop_size), min(xyxy_bbox[0], img_w - crop_size)))
-        print("Height low val {} high val {}".format(max(0, xyxy_bbox[3] - crop_size), min(xyxy_bbox[1], img_h - crop_size)))
-        raise ValueError
+    # Calculate valid ranges for width (w_s)
+    low_w = max(0, xyxy_bbox[2] - crop_size)
+    high_w = min(xyxy_bbox[0], img_w - crop_size)
+    
+    # Calculate valid ranges for height (h_s)
+    low_h = max(0, xyxy_bbox[3] - crop_size)
+    high_h = min(xyxy_bbox[1], img_h - crop_size)
+    
+    # Ensure low < high for width
+    if low_w == high_w:
+        w_s = img_w - crop_size  # Default to bbox start or within image bounds
+    else:
+        w_s = np.random.randint(low_w, high_w)
+    
+    # Ensure low < high for height
+    if low_h == high_h:
+        h_s =  img_h - crop_size  # Default to bbox start or within image bounds
+    else:
+        h_s = np.random.randint(low_h, high_h)
     return h_s, w_s
 
 def complete_crop(crop_xyxy : np.ndarray, crop_size : int, all_dets : dict, img_shape : tuple) -> tuple:
@@ -158,8 +169,6 @@ def save_crops(img : np.ndarray, crops : dict, all_detections : dict, img_id : s
         save_image(img_crop, str(img_p))
         label_p = cropd_l / (img_id + f"_{i}.txt")
         save_label(cr_label, label_p)
-
-    print("Test Debug line")
 
 def convert_label_dim(crop_xy : tuple, bbox_xyxy : np.ndarray, crop_size : int = 1280) -> np.ndarray:
     """
