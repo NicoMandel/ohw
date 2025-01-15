@@ -68,9 +68,9 @@ mkdir -p "$base_shared_dir/log/crops/$ds_name"
     # actual job - ensure that the directories are correct - input and output!
     echo "singularity exec --nv --pwd /home/ubuntu --bind $code_repo/scripts:/home/ubuntu/ \
             --bind $code_repo/src/ohw:/home/ubuntu/ohw \
-            --bind \"$site_location\":/home/ubuntu/geotags \
+            --bind \"$site_location\":/home/ubuntu/image_dir \
             $base_shared_dir/pt-pyexiftool.simg python3 -u crop_images.py \
-            $site_location/images $site_location/labels -o $site_location/crops"
+            image_dir/images/ image_dir/labels/ -o $site_location/crops"
 } > "$jn.sh"
 
 sbatch "$jn".sh
