@@ -76,7 +76,7 @@ mkdir -p "$base_shared_dir/log/crops/$ds_name"
             --bind $code_repo/src/ohw:/home/ubuntu/ohw \
             --bind \"$site_location\":/home/ubuntu/image_dir \
             $base_shared_dir/pt-pyexiftool.simg python3 -u crop_images.py \
-            image_dir/images/ image_dir/labels/ -o $site_location/crops"
+            image_dir/images/ image_dir/labels/ -o image_dir/crops"
 } > "$jn.sh"
 
 sbatch "$jn".sh
