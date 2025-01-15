@@ -10,7 +10,7 @@ from ultralytics.utils.ops import xywhn2xyxy, xyxy2xywhn
 from ultralytics.utils.plotting import Annotator, colors
 
 from ohw.dataset import DisplayLabelsDataset
-from ohw.utils import save_image, save_label
+from ohw.utils import save_image, save_label, print_memory_usage
 
 def parse_args():
     parser = ArgumentParser(description="Script for cropping images of a given resolution to include all bounding boxes.")
@@ -80,7 +80,11 @@ def complete_crop(crop_xyxy : np.ndarray, crop_size : int, all_dets : dict, img_
         TODO - safeguard here. If too many iterations, drop back and continue with the next item on the bbox list
     """
     redo = True
+    i = 0 
     while(redo):
+        i += 1
+        if (i % 10 == 0):
+            print_memory_usage(f"regenerating crop iteration {i}")
         h_s, w_s = get_start_location(crop_xyxy, crop_size, img_shape)
         xyxy_crop = w_s, h_s, w_s + crop_size, h_s + crop_size
         
@@ -188,8 +192,11 @@ def crop_images(input_dir : str, label_dir : str = None, output_dir : str = None
         cropdir = Path(os.path.abspath(output_dir))
         cropd_i = cropdir / "images"
         cropd_l = cropdir / "labels"
-        
+    
+    j = 0
     for img, detections, img_id in tqdm(yds, leave=True):
+        j +=1
+        print_memory_usage(f"Image: {j}")
         if np.any(detections):
 
             img_shape = img.shape[:2]
@@ -221,11 +228,7 @@ def crop_images(input_dir : str, label_dir : str = None, output_dir : str = None
                 crop_start_det = dets_dict[crop_start_det_i]
                 
                 # get a crop that ensures that there is no bbox 
-                try:
-                    crop_start, contained_bboxes = complete_crop(crop_start_det, crop_size, detections_dict, img_shape)
-                except ValueError as e:
-                    print("Image: {}".format(img_id))
-                    raise e
+                crop_start, contained_bboxes = complete_crop(crop_start_det, crop_size, detections_dict, img_shape)
                 # crop number. Store top left coordinates and all ids from "detections_dict" which are contained
                 crops[k] = (crop_start, contained_bboxes)
 

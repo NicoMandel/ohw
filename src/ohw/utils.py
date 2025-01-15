@@ -11,6 +11,11 @@ import cv2
 from ultralytics.utils.ops import xywhn2xyxy
 
 # debugging memory usage
+def print_memory_usage(stage=""):
+    process = psutil.Process(os.getpid())
+    print(f"[{stage}] Memory usage: {process.memory_info().rss / (1024 ** 3):.2f} GB")
+
+
 def log_memory_usage(i : int = 0):
     mem_usage = mem_usage_of_process_tree()
     print(f"Memory RSS usage at end of iteration {i} including subprocesses: {mem_usage:.2f} MB")  
