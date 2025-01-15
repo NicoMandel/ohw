@@ -16,7 +16,6 @@ def parse_args():
     parser = ArgumentParser(description="Script for cropping images of a given resolution to include all bounding boxes.")
     parser.add_argument("input", type=str, help="Location of the image input folder.")
     parser.add_argument("labels", type=str, help="Location of labels folder.")
-    parser.add_argument("name", type=str, default=None, help="Name of the dataset to be used as prefix for the crops.")
     parser.add_argument("-o", "--output", default=None, type=str, help="Output folder location. If given, will create subfolder with <crops>")
     parser.add_argument("-c", "--crops", default=1280, type=int, help="Size of crops to be used")
     parser.add_argument("--seed", default=0, type=int, help="Seed for numpy to use when cropping. For reproducibility")
@@ -164,7 +163,7 @@ def convert_label_dim(crop_xy : tuple, bbox_xyxy : np.ndarray, crop_size : int =
     crop_xywhn = xyxy2xywhn(crop_xyxy.astype(np.float32), w = crop_size, h = crop_size)
     return crop_xywhn
 
-def crop_images(input_dir : str, label_dir : str = None, ds_name : str = None, output_dir : str = None, crop_size : int = 1280):
+def crop_images(input_dir : str, label_dir : str = None, output_dir : str = None, crop_size : int = 1280):
     site_dir = os.path.abspath(input_dir)
     label_dir = os.path.abspath(label_dir)
     yds = DisplayLabelsDataset(root=site_dir, img_dir=None, ldir=label_dir)
@@ -242,4 +241,4 @@ def crop_images(input_dir : str, label_dir : str = None, ds_name : str = None, o
 if __name__=="__main__":
     args = parse_args()
     np.random.seed(args.seed)
-    crop_images(args.input, args.labels, args.name, args.output, args.crops)
+    crop_images(args.input, args.labels, args.output, args.crops)

@@ -66,7 +66,7 @@ mkdir -p "$base_shared_dir/log/crops/$ds_name"
     echo "#SBATCH --output=$base_shared_dir/log/crops/$ds_name/job-%j.out" 
 
     # actual job - ensure that the directories are correct - input and output!
-    echo "singularity exec --nv --pwd /home/ubuntu --bind $code_repo/scripts:/home/ubuntu/ \
+    echo "singularity exec --pwd /home/ubuntu --bind $code_repo/scripts:/home/ubuntu/ \
             --bind $code_repo/src/ohw:/home/ubuntu/ohw \
             --bind \"$site_location\":/home/ubuntu/image_dir \
             $base_shared_dir/pt-pyexiftool.simg python3 -u crop_images.py \
