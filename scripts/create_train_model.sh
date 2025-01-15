@@ -17,6 +17,9 @@ for ms in "${model_size[@]}"; do
         # create job name
         jn="$ms-$ds"
 
+        # create log directory
+        mkdir -p "$base_shared_dir/log/training/$ds/$ms"
+
         # automatically fill in sbatch file
         echo "#!/bin/bash" >> "$jn".sh
         echo "#SBATCH -N 1" >> "$jn".sh
@@ -28,8 +31,8 @@ for ms in "${model_size[@]}"; do
         echo "#SBATCH --mem 32G" >> "$jn".sh
         echo "#SBATCH -t 0-10:59" >> "$jn".sh
         echo "#SBATCH --job-name=\"$jn\"" >> "$jn".sh
-        echo "#SBATCH --err=$base_shared_dir/log/training/job-%j.err" >> "$jn".sh
-        echo "#SBATCH --output=$base_shared_dir/log/training/job-%j.out" >> "$jn".sh
+        echo "#SBATCH --err=$base_shared_dir/log/training/$ds/$ms/job-%j.err" >> "$jn".sh
+        echo "#SBATCH --output=$base_shared_dir/log/training/$ds/$ms/job-%j.out" >> "$jn".sh
 
         # module parts
         echo "module purge" >> "$jn".sh

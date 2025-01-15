@@ -92,6 +92,9 @@ for jobsite in "${flightdirs[@]}"; do
     mkdir -p $j_output
     echo "created $j_output"
 
+    # create logging directory
+    mkdir -p "$base_shared_dir/log/inference/$site_name/$jobname"
+
     # automatically fill in sbatch file
     {
         echo "#!/bin/bash" 
@@ -103,8 +106,8 @@ for jobsite in "${flightdirs[@]}"; do
         echo "#SBATCH --gpus-per-node=1" 
         echo "#SBATCH -t 0-02:59"            
         echo "#SBATCH --job-name=\"$jn\"" 
-        echo "#SBATCH --err=$base_shared_dir/log/inference/job-%j.err" 
-        echo "#SBATCH --output=$base_shared_dir/log/inference/job-%j.out" 
+        echo "#SBATCH --err=$base_shared_dir/log/inference/$site_name/$jobname/job-%j.err" 
+        echo "#SBATCH --output=$base_shared_dir/log/inference/$site_name/$jobname/job-%j.out" 
 
         # actual job - ensure that the directories are correct - input and output!
         echo "singularity exec --nv --pwd /home/ubuntu --bind $code_repo/scripts:/home/ubuntu/ \
