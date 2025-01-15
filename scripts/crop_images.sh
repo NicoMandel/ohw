@@ -47,10 +47,16 @@ if [  ! -d "$site_location/labels/" ]; then
     exit -1
 fi
 
-echo "Input directory: $site_location is valid"
-module load slurm
+echo "Input directory: $site_location is valid. Creating crop subdirectory"
+
+# creating subdirectory.
+mkdir -p "$site_location/crops/images"
+mkdir -p "$site_location/crops/labels"
+
 ds_name=$(basename "$site_location")
 jn="crops-$ds_name"
+
+# Creating log directory
 mkdir -p "$base_shared_dir/log/crops/$ds_name"
 
 # automatically fill in sbatch file

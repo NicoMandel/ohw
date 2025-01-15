@@ -173,9 +173,6 @@ def crop_images(input_dir : str, label_dir : str = None, output_dir : str = None
         cropdir = Path(os.path.abspath(output_dir))
         cropd_i = cropdir / "images"
         cropd_l = cropdir / "labels"
-        cropd_i.mkdir(exist_ok=True, parents=True)
-        cropd_l.mkdir(exist_ok=True, parents=True)
-        print("Created: {}\n and children <images> and <labels>".format(cropdir))
         
     for img, detections, img_id in tqdm(yds, leave=True):
         if np.any(detections):
