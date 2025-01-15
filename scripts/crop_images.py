@@ -50,11 +50,17 @@ def get_start_location(xyxy_bbox : np.ndarray, crop_size : int, img_shape) -> np
     """
         Function to generate a starting point for a crop from a bounding box. Generates 2 ints between the starting location of the bbox 
         and the end location of the bbox - 1280
-        TODO: make this some form of search? 
     """
-    img_h, img_w = img_shape
-    w_s = np.random.randint(max(0, xyxy_bbox[2] - crop_size), min(xyxy_bbox[0], img_w - crop_size))
-    h_s = np.random.randint(max(0, xyxy_bbox[3] - crop_size), min(xyxy_bbox[1], img_h - crop_size))
+    try:
+        img_h, img_w = img_shape
+
+        w_s = np.random.randint(max(0, xyxy_bbox[2] - crop_size), min(xyxy_bbox[0], img_w - crop_size))
+        h_s = np.random.randint(max(0, xyxy_bbox[3] - crop_size), min(xyxy_bbox[1], img_h - crop_size))
+    except ValueError:
+        print("Numpy ValueError. img w x h {} x {}".format(img_w, img_h))
+        print("Width low val {} high val {}".format(max(0, xyxy_bbox[2] - crop_size), min(xyxy_bbox[0], img_w - crop_size)))
+        print("Height low val {} high val {}".format(max(0, xyxy_bbox[3] - crop_size), min(xyxy_bbox[1], img_h - crop_size)))
+        raise ValueError
     return h_s, w_s
 
 def complete_crop(crop_xyxy : np.ndarray, crop_size : int, all_dets : dict, img_shape : tuple) -> tuple:
@@ -206,8 +212,11 @@ def crop_images(input_dir : str, label_dir : str = None, output_dir : str = None
                 crop_start_det = dets_dict[crop_start_det_i]
                 
                 # get a crop that ensures that there is no bbox 
-                crop_start, contained_bboxes = complete_crop(crop_start_det, crop_size, detections_dict, img_shape)
-
+                try:
+                    crop_start, contained_bboxes = complete_crop(crop_start_det, crop_size, detections_dict, img_shape)
+                except ValueError as e:
+                    print("Image: {}".format(img_id))
+                    raise e
                 # crop number. Store top left coordinates and all ids from "detections_dict" which are contained
                 crops[k] = (crop_start, contained_bboxes)
 
