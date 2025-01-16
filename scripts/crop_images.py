@@ -173,6 +173,7 @@ def save_crops(img : np.ndarray, crops : dict, all_detections : dict, img_id : s
         save_image(img_crop, str(img_p))
         label_p = cropd_l / (img_id + f"_{i}.txt")
         save_label(cr_label, label_p)
+    return None
 
 def convert_label_dim(crop_xy : tuple, bbox_xyxy : np.ndarray, crop_size : int = 1280) -> np.ndarray:
     """
@@ -196,9 +197,7 @@ def crop_images(input_dir : str, label_dir : str = None, output_dir : str = None
     j = 0
     for img, detections, img_id in tqdm(yds, leave=True):
         j +=1
-        print_memory_usage(f"Image: {j}")
         if np.any(detections):
-
             img_shape = img.shape[:2]
             # convert detections to xyxy
             img_h, img_w = img_shape
@@ -219,6 +218,7 @@ def crop_images(input_dir : str, label_dir : str = None, output_dir : str = None
             
             # crop id
             k = 0
+            print_memory_usage(f"Iteration: {j}, Image : {img_id}, detections: {len(detections)}")
 
             # while there are still unallocated detections
             while(dets_dict):
@@ -235,7 +235,7 @@ def crop_images(input_dir : str, label_dir : str = None, output_dir : str = None
                 # remove all detections that are already allocated to this crop
                 [dets_dict.pop(b_id) for b_id in contained_bboxes if b_id in dets_dict]
                 k += 1
-
+                print_memory_usage(f"Img: {img_id} crop: {k}")
                 # _plot_crop(img, crop_start, contained_bboxes, detections_dict)
             
             # write the crops with suffix k and bounding boxes out to the directory
@@ -244,6 +244,8 @@ def crop_images(input_dir : str, label_dir : str = None, output_dir : str = None
             ))
             save_crops(img, crops, detections_dict,  img_id, cropd_i, cropd_l)
             # img_w_bboxes = annotate_image(img, detections)
+    print("Done cropping images.")
+    return None
 
         # # if no label -> for false Positives
         # else: 
