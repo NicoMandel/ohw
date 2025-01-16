@@ -81,7 +81,7 @@ echo "singularity exec --nv --pwd /home/ubuntu \
     --bind $code_repo/scripts:/home/ubuntu/ \
     --bind $base_shared_dir/data:/home/ubuntu/datasets \
     --bind $code_repo/src/ohw:/home/ubuntu/ohw \
-    --bind $base_shared_dir/results_2025:/home/ubuntu/results \
+    --bind $base_shared_dir/results:/home/ubuntu/results \
     $base_shared_dir/pt-ul-8281.simg python3 -u train_model.py \
     $model_size datasets/$dataset/$dataset.yaml $registry_string" >> "$jn".sh
 

@@ -21,7 +21,9 @@ usage() {
                 /mnt/load/aerial/drone_uav/2023-24/Ag_Drones_1/2023.12.19_Tantangara_North_East/WingtraPilotProjects/ 
                 alternatives: , 2023.12.22_Mufflers_Gap, 202.12.23_Long_Plain_Rd_Snowy_Mtns_Hwy_jxn, 2023.12.21_Billmans_Point/
         -r resolution which to process. Must be one of <024cm> or <1cm>. So that the appropriate model can be chosen. Defaults to 024cm
-        -m path to model registry file, specifying models that can be chosen. Defaults to '$base_shared_dir/$model_registry'. Can also specify a run directory. If it doesn't end in .xlsx,will load the model from weights/best.pt inside that folder.
+        -m path to model registry file, specifying models that can be chosen. Defaults to '$base_shared_dir/results/$model_registry'.
+            Can also specify a run directory, as child of '$base_shared_dir/results'.
+            If it doesn't end in .xlsx, will attempt to load the model from weights/best.pt inside that folder.
         -o overlap ratio to be used. When processing two adjacent images, percentage that overlaps. Default is $ratio
         -c confidence to use. optional for registry, required for direct model files instead of registries.
         -h display this help message
