@@ -64,10 +64,10 @@ jn="autosplit-$ds_name"
     echo "#SBATCH --output=$base_shared_dir/log/job-%j.out" 
 
     # actual job - ensure that the directories are correct - input and output!
-    echo "singularity exec --pwd /home/ubuntu --bind $code_repo/scripts:/home/ubuntu/ \
+    echo "singularity exec --pwd /home/ubuntu/image_dir --bind $code_repo/scripts:/home/ubuntu/ \
             --bind $code_repo/src/ohw:/home/ubuntu/ohw \
             --bind \"$site_location\":/home/ubuntu/image_dir \
-            $base_shared_dir/pt-pyexiftool.simg python3 -u split_dataset.py \
+            $base_shared_dir/pt-pyexiftool.simg python3 -u ../split_dataset.py \
             image_dir"
 } > "$jn.sh"
 
