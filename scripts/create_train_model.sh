@@ -10,13 +10,13 @@ registry=""
 usage() {
     printf "\nUsage : $0 -d <dataset>
     Options:
-        -d dataset to be used. Required. Choose from any in $base_share_dir/data 
+        -d dataset to be used. Required. Choose from any in $base_shared_dir/data 
         -m model size to be used. Choose from n,s,m,l. defaults to m 
-        -r Model registry file for storing results. If not given, will just save. Advised to set to $base_shared_dir/results/model_res.xlsx
+        -r Model registry file for storing results, as child of $base_shared_dir/results. If not given, will just save. Advised to set to 'model_res.xlsx'
         -h display this help message
         
         Example:
-            $0 -d 'dataset' -m 's' -r '/path/to/registry.xlsx'
+            $0 -d 'dataset' -m 's' -r 'results/registry.xlsx'
 "
 }
 
@@ -43,7 +43,7 @@ fi
 
 # set registry string if given
 if [[ -n "$registry" ]]; then
-    registry_string="--save $registry"
+    registry_string="--save results/$registry"
 else
     registry_string=""
 fi
@@ -83,7 +83,7 @@ echo "singularity exec --nv --pwd /home/ubuntu \
     --bind $code_repo/src/ohw:/home/ubuntu/ohw \
     --bind $base_shared_dir/results_2025:/home/ubuntu/results \
     $base_shared_dir/pt-ul-8281.simg python3 -u train_model.py \
-    $model_size datasets/$ds/$ds.yaml $registry_string" >> "$jn".sh
+    $model_size datasets/$dataset/$dataset.yaml $registry_string" >> "$jn".sh
 
 # choose between sbatch "$jn.sh" or cat "$jn.sh"
 sbatch "$jn.sh"
