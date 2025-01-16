@@ -68,7 +68,7 @@ jn="autosplit-$ds_name"
             --bind $code_repo/src/ohw:/home/ubuntu/ohw \
             --bind \"$site_location\":/home/ubuntu/image_dir \
             $base_shared_dir/pt-pyexiftool.simg python3 -u ../split_dataset.py \
-            ."
+            train"
 } > "$jn.sh"
 
 sbatch "$jn".sh
