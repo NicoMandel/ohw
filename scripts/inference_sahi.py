@@ -40,8 +40,7 @@ def sahi(input_dir : str, registry_f : str, resolution : str, output : str, name
         pixel : int = 50, lw : int =5):
     # Model
     model_name, conf_thresh = get_model(registry_f, resolution, confidence, metric)
-    model_prfx = str(Path(registry_f).resolve().parent)
-    model_p = os.path.join(model_prfx , model_name, 'weights', 'best.pt')
+    model_p = os.path.join(os.path.dirname(registry_f) , model_name, 'weights', 'best.pt')
         
     # overwrite confidence, if the arg is given 
     if confidence is not None:
