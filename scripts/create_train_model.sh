@@ -8,7 +8,7 @@ model_size="m"
 registry=""
 
 usage() {
-    printf "\nUsage : $0 -d <dataset_directory>
+    printf "\nUsage : $0 -d <dataset>
     Options:
         -d dataset to be used. Required. Choose from any in $base_share_dir/data 
         -m model size to be used. Choose from n,s,m,l. defaults to m 
@@ -16,12 +16,12 @@ usage() {
         -h display this help message
         
         Example:
-            $0 -d '/path/to/dataset_folder' -m 's' -r '/path/to/registry.xlsx'
+            $0 -d 'dataset' -m 's' -r '/path/to/registry.xlsx'
 "
 }
 
 # argument parsing
-while getopts 's:r:m:c:o:h' flag; do 
+while getopts 'd:m:r:h' flag; do 
     case "${flag}" in
         d) dataset="${OPTARG}" ;;
         m) model_size="${OPTARG}" ;;
@@ -35,7 +35,7 @@ done
 
 # check required arguments
 if [ -z "$dataset" ]; then
-    echo "ERROR: Dataset directory is required!".
+    echo "ERROR: Dataset is required!".
     usage
     exit -1
 fi
