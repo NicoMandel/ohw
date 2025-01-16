@@ -7,8 +7,7 @@ base_shared_dir="/mnt/scratch_lustre/hawkweed_drone_scratch"
 usage() {
     printf "\nUsage : $0 -i <input>
     Options:
-        -i input folder. Inside, requires a subfolder named <images> and one named <labels>. Will create <crops> subfolder automatically, with <images> and adapted <labels> subfolder.
-        CAREFUL. DO NOT USE DIRECTLY DETECTION OUTPUT. The visualisations contain bounding boxes, which will be cropped too, so that will taint the image. Copy across the original images first.
+        -i input folder of the dataset. Top level root folder, so above 'train' and 'test'
         -h display this help message
         
         Example:
@@ -31,33 +30,26 @@ while getopts 'i:h' flag; do
 done
 
 # check required arguments
-if [  ! -d "$site_location/images/" ]; then
-    echo "ERROR: images subdirectory is required!"
+if [  ! -d "$site_location/train/" ]; then
+    echo "ERROR: train subdirectory is required!"
     content=$(ls $site_location)
     echo "Content of $site_location is: $content"
     usage
     exit -1
 fi
 
-if [  ! -d "$site_location/labels/" ]; then
-    echo "ERROR: label subdirectory is required!"
+if [  ! -d "$site_location/test/" ]; then
+    echo "ERROR: test subdirectory is required!"
     content=$(ls $site_location)
     echo "Content of $site_location is: $content" 
     usage
     exit -1
 fi
 
-echo "Input directory: $site_location is valid. Creating crop subdirectory"
-
-# creating subdirectory.
-mkdir -p "$site_location/crops/images"
-mkdir -p "$site_location/crops/labels"
+echo "Input directory: $site_location is valid."
 
 ds_name=$(basename "$site_location")
-jn="crops-$ds_name"
-
-# Creating log directory
-mkdir -p "$base_shared_dir/log/crops/$ds_name"
+jn="autosplit-$ds_name"
 
 # automatically fill in sbatch file
 {
@@ -66,17 +58,17 @@ mkdir -p "$base_shared_dir/log/crops/$ds_name"
     echo "#SBATCH -n 1" 
     echo "#SBATCH -c 4" 
     echo "#SBATCH --mem 16G" 
-    echo "#SBATCH -t 0-02:59"            
+    echo "#SBATCH -t 0-00:59"            
     echo "#SBATCH --job-name=\"$jn\""
-    echo "#SBATCH --err=$base_shared_dir/log/crops/$ds_name/job-%j.err" 
-    echo "#SBATCH --output=$base_shared_dir/log/crops/$ds_name/job-%j.out" 
+    echo "#SBATCH --err=$base_shared_dir/log/job-%j.err" 
+    echo "#SBATCH --output=$base_shared_dir/log/job-%j.out" 
 
     # actual job - ensure that the directories are correct - input and output!
     echo "singularity exec --pwd /home/ubuntu --bind $code_repo/scripts:/home/ubuntu/ \
             --bind $code_repo/src/ohw:/home/ubuntu/ohw \
             --bind \"$site_location\":/home/ubuntu/image_dir \
-            $base_shared_dir/pt-pyexiftool.simg python3 -u crop_images.py \
-            image_dir/images/ image_dir/labels/ -o image_dir/crops"
+            $base_shared_dir/pt-pyexiftool.simg python3 -u split_dataset.py \
+            image_dir"
 } > "$jn.sh"
 
 sbatch "$jn".sh
